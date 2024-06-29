@@ -22,7 +22,8 @@ if($_POST){
                 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
                 $_SESSION['id'] = $usuario['id'];
                 $_SESSION['nombre'] = $usuario['nombre'];
-                $_SESSION['id_permisos'] = $usuario['id_permisos'];                 
+                $_SESSION['id_permisos'] = $usuario['id_permisos'];   
+                $_SESSION['correo'] = $usuario['correo'];              
                 // ------------------------------------------------
                 if ($usuario['id_permisos'] == 1) {
                     header('Location: admin/index.php');

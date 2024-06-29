@@ -154,8 +154,8 @@ if(!isset($_SESSION['nombre'])){
                     <!-- iconos sacados de "fontawesome" -->
                     <i class="fas fa-user pr-2"></i>
                     Administrador:
-                    <?php if (isset($_SESSION['nombre']) && isset($_SESSION['apellido'])) : ?>                    
-                    <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
+                    <?php if (isset($_SESSION['nombre']) ) : ?>                    
+                    <?php echo $_SESSION['nombre'] ; ?>
                     <?php endif; ?>
                     </a>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
