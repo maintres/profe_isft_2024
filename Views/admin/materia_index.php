@@ -48,9 +48,9 @@ require 'navbar.php';
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <a href="materia_edit.php?id=<?php echo htmlspecialchars($materia['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm" role="button"><i class="fas fa-edit"></i></a>
-                                                <a href="javascript:eliminar3(<?php echo $materia['id']; ?>)" class="btn btn-danger btn-sm" title="Borrar" role="button">
+                                                <!-- <a href="javascript:eliminar3(<?php echo $materia['id']; ?>)" class="btn btn-danger btn-sm" title="Borrar" role="button">
                                                     <i class="fas fa-trash"></i>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </td>
                                     </tr>
