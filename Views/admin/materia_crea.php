@@ -8,13 +8,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $error = "";
     try {
         // Verificar si el correo electrónico ya existe
-        $sql_check_email = "SELECT COUNT(*) FROM asignaturas WHERE nombre = :nombre";
-        $stmt_check_email = $db->prepare($sql_check_email);
-        $stmt_check_email->bindParam(':email', $email);
-        $stmt_check_email->execute();
-        $count_email = $stmt_check_email->fetchColumn();
+        $sql_check_nombre = "SELECT COUNT(*) FROM asignaturas WHERE nombre = :nombre";
+        $stmt_check_nombre = $db->prepare($sql_check_nombre);
+        $stmt_check_nombre->bindParam(':nombre', $nombre);
+        $stmt_check_nombre->execute();
+        $count_nombre = $stmt_check_nombre->fetchColumn();
         // Verificar si el DNI ya existe        
-        if ($count_email > 0) {
+        if ($count_nombre > 0) {
             $error = "Materia ya registrada. Por favor, ingrese una diferente.";
         }
         if ($error) {
@@ -67,15 +67,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <form id="formulario" method="post" action="">
                 <!-- --------------------------------- -->
                     <div class="col">
-                        <div class="form-group">
-                            <label for="cantidaddehoras">cantidad de horas:</label>
-                            <input type="text" class="form-control" name="cantidaddehoras" id="cantidaddehoras" value="<?php echo htmlspecialchars($cantidaddehoras); ?>" autocomplete="off" placeholder="Ingrese cantidaddehoras(s)" required>
-                        </div>
-                        <!-- ---------------------------- -->
+
                         <div class="form-group">
                             <label for="nombre">Nombre:</label>
                             <input type="text" class="form-control" name="nombre" id="nombre" value="<?php echo htmlspecialchars($nombre); ?>" autocomplete="off" placeholder="Ingrese Nombre(s)" required>
                         </div>
+                        <!-- ---------------------------- -->
+                        <div class="form-group">
+                            <label for="cantidaddehoras">Horas de cursada:</label>
+                            <input type="text" class="form-control" name="cantidaddehoras" id="cantidaddehoras" value="<?php echo htmlspecialchars($cantidaddehoras); ?>" autocomplete="off" placeholder="Ingrese cantidaddehoras(s)" required>
+                        </div>
+                       
+                        
                     </div>
                 <!-- --------------------------------- -->
                 <button type="button" class="btn btn-primary float-right" id="guardarBtn" onclick="validarFormulario()">Guardar</button>

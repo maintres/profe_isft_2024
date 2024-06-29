@@ -8,10 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $nombre = $_POST['nombre'];        
         $cantidaddehoras = $_POST['cantidaddehoras'];
 
-        $consulta_actualizar = $db->prepare("UPDATE asignaturas SET nombre = ?, cantidaddehoras	= ?, WHERE id = ?");
-        $consulta_actualizar->bindParam($id,$nombre,$cantidaddehoras);
+        $consulta_actualizar = $db->prepare("UPDATE asignaturas SET nombre = ?, cantidaddehoras	= ? WHERE id = ?");
+        $consulta_actualizar->bindParam($id,$nombre,$cantidaddehoras,$id);
 
-        if ($consulta_actualizar->execute()) {
+        if ($consulta_actualizar->execute([$nombre, $cantidaddehoras,$id])) {
             $infoMessage = 'Registro modificado correctamente';
         } else {
             $errorMessage = 'Error al editar el registro: ' . implode(', ' . $consulta_actualizar->errorInfo());
@@ -22,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 // --------------------------------------------------------------------
 if (isset($_GET['id'])) {
-    $id_materia = $_GET['id'];
+    $id = $_GET['id'];
     // Consultar la materia con el ID proporcionado
     $consulta_materia = $db->prepare("SELECT * FROM asignaturas WHERE id = ?");
-    $consulta_materia->execute([$id_materia]);
+    $consulta_materia->execute([$id]);
     $materia = $consulta_materia->fetch();
     // Verificar si se encontró la materia
     if (!$materia) {
