@@ -21,18 +21,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $redirect_url = "materia_crea.php?error=" . urlencode($error)
                 . "&nombre=" . urlencode($nombre)
                 . "&cantidaddehoras=" . urlencode($cantidaddehoras);
-
             header("Location: " . $redirect_url);
             exit();
         } else {
             // Inserta datos en la base de datos
             $sql = "INSERT INTO asignaturas (nombre,cantidaddehoras) 
                     VALUES (:nombre, :cantidaddehoras)";
-
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':nombre', $nombre);
-            $stmt->bindParam(':cantidaddehoras', $cantidaddehoras);         
-
+            $stmt->bindParam(':cantidaddehoras', $cantidaddehoras);     
             if ($stmt->execute()) {
                 header("Location: materia_index.php?mensaje=" . urlencode("Materia ingresada con éxito."));
                 exit();
@@ -45,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $redirect_url = "materia_crea.php?error=" . urlencode($error)
             . "&nombre=" . urlencode($nombre)
             . "&cantidaddehoras=" . urlencode($cantidaddehoras);
-
         header("Location: " . $redirect_url);
         exit();
     }
@@ -61,13 +57,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Recupera el mensaje de error y los datos del formulario desde la URL
             $error = isset($_GET["error"]) ? $_GET["error"] : "";
             $nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
-            $cantidaddehoras = isset($_GET["cantidaddehoras"]) ? $_GET["cantidaddehoras"] : "";
-            
+            $cantidaddehoras = isset($_GET["cantidaddehoras"]) ? $_GET["cantidaddehoras"] : "";            
             ?>
             <form id="formulario" method="post" action="">
                 <!-- --------------------------------- -->
                     <div class="col">
-
                         <div class="form-group">
                             <label for="nombre">Nombre:</label>
                             <input type="text" class="form-control" name="nombre" id="nombre" value="<?php echo htmlspecialchars($nombre); ?>" autocomplete="off" placeholder="Ingrese Nombre(s)" required>
@@ -76,9 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="form-group">
                             <label for="cantidaddehoras">Horas de cursada:</label>
                             <input type="text" class="form-control" name="cantidaddehoras" id="cantidaddehoras" value="<?php echo htmlspecialchars($cantidaddehoras); ?>" autocomplete="off" placeholder="Ingrese cantidaddehoras(s)" required>
-                        </div>
-                       
-                        
+                        </div>          
                     </div>
                 <!-- --------------------------------- -->
                 <button type="button" class="btn btn-primary float-right" id="guardarBtn" onclick="validarFormulario()">Guardar</button>
