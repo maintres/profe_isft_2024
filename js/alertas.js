@@ -68,6 +68,20 @@ function eliminar5 (id_mesa){
            }          
     });
 }
+function eliminar_carrera (id_carrera){
+  Swal.fire({
+      icon: "error",
+      title: "¿Borrar?",        
+      showCancelButton: true,
+      confirmButtonText: "Si",   
+      confirmButtonColor: "#007bff",
+      cancelButtonColor: '#dc3545',     
+    }).then((result) => {  
+          if (result.isConfirmed) { 
+            window.location = "../admin/carrera_index.php?txtID="+id_carrera;
+           }          
+    });
+}
 
 
 
