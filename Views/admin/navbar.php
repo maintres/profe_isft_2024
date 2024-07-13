@@ -131,7 +131,8 @@ if(!isset($_SESSION['nombre'])){
                 Profesor
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="profe_index.php">Listado Profesor</a></li>
+                <li><a class="dropdown-item" href="agregar_profe.php">Agregar Profesor</a></li>
+                <li><a class="dropdown-item" href="list_profe.php">Listado de Profesores</a></li>
                 <li><a class="dropdown-item" href="asigna_index.php">Listado de Asignaciones</a></li>
               </ul>
             </li>
