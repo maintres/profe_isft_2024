@@ -145,8 +145,8 @@ if(!isset($_SESSION['nombre'])){
               <a class="nav-link " href="carrera_index.php">Carreras</a>
             </li>
              <!-- ------------------------------------------------------- -->
-            <li class="nav-item  pr-3">
-              <a class="nav-link" href="admin_index.php">Administradores</a>
+             <li class="nav-item  pr-3">
+              <a class="nav-link " href="list_asist.php">Asistencia</a>
             </li>
             <!-- ------------------------------------------------------- -->
           </ul>     
