@@ -22,18 +22,18 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
 
         // Redireccionar a la lista de asistencias con mensaje de éxito
         $mensaje = "Registro de asistencia eliminado correctamente.";
-        header("Location: list_asist.php?mensaje=" . urlencode($mensaje));
+        header("Location: asistencia_index.php?mensaje=" . urlencode($mensaje));
         exit();
 
     } catch (Exception $e) {
         $error = "Error al eliminar el registro: " . $e->getMessage();
-        header("Location: list_asist.php?error=" . urlencode($error));
+        header("Location: asistencia_index.php?error=" . urlencode($error));
         exit();
     }
 } else {
     // Manejar el caso en que no se recibió el ID adecuadamente
     $error = "ID de registro no especificado.";
-    header("Location: list_asist.php?error=" . urlencode($error));
+    header("Location: asistencia_index.php?error=" . urlencode($error));
     exit();
 }
 ?>

@@ -1,9 +1,7 @@
 <?php
 include("../../conn/connection.php");
 require("navbar.php");
-?>
-
-<?php
+// --------------------------------
 if (isset($_POST['enviar'])) {
   // Aquí entra cuando se presiona el botón enviar.
   $id = $_POST['id'];
@@ -26,7 +24,6 @@ if (isset($_POST['enviar'])) {
         location.assign('carrera_index.php');
         </script>";
   }
-
   mysqli_stmt_close($sentenciaPreparada);
   // mysqli_close($conexion);
 } else {
