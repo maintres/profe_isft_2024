@@ -86,7 +86,7 @@ $result_materias = $db->query($query_materias);
                         <option value="suplente">Suplente</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="baja">Baja:</label>
                     <input type="checkbox" name="baja" value="SI" <?php echo $baja == "SI" ? 'checked' : ''; ?>> Marcar si tiene baja
                 </div>
@@ -97,7 +97,7 @@ $result_materias = $db->query($query_materias);
                 <div class="form-group">
                     <label for="motivo_baja">Motivo de Baja:</label>
                     <textarea name="motivo_baja" class="form-control"><?php echo htmlspecialchars($motivo_baja); ?></textarea>
-                </div>
+                </div> -->
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <?php if (!empty($error)) : ?>
                     <div class="alert alert-danger mt-3"><?php echo $error; ?></div>
