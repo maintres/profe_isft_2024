@@ -96,9 +96,8 @@ if(!isset($_SESSION['nombre'])){
           icon: "error",
           title: "Error",
           text: "<?php echo $error; ?>",
-          showConfirmButton: true,
-          confirmButtonText: "OK",
-          confirmButtonColor: "#d33"
+          showConfirmButton: false,          
+          timer: 1700
         }).then(() => {
           // Eliminar parámetro de la URL
           const url = new URL(window.location);
@@ -126,15 +125,18 @@ if(!isset($_SESSION['nombre'])){
             <div class="collapse navbar-collapse " id="navbarNav">
               <ul class="navbar-nav mr-auto ">
             <!-- ------------------------------------------------------- -->
-            <li class="nav-item dropdown pr-3">
+            <!-- <li class="nav-item dropdown pr-3">
               <a class="nav-link dropdown-toggle  " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Profesor
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="agregar_profe.php">Agregar Profesor</a></li>
-                <li><a class="dropdown-item" href="list_profe.php">Listado de Profesores</a></li>
+                <li><a class="dropdown-item" href="profe_crea.php">Agregar Profesor</a></li>
+                <li><a class="dropdown-item" href="profe_index.php">Listado de Profesores</a></li>
                 <li><a class="dropdown-item" href="asigna_index.php">Listado de Asignaciones</a></li>
               </ul>
+            </li> -->
+            <li class="nav-item  pr-3">
+              <a class="nav-link " href="profe_index.php">Profesor </a>
             </li>
               <!-- ------------------------------------------------------- -->
             <li class="nav-item  pr-3">
@@ -146,9 +148,12 @@ if(!isset($_SESSION['nombre'])){
             </li>
              <!-- ------------------------------------------------------- -->
              <li class="nav-item  pr-3">
-              <a class="nav-link " href="list_asist.php">Asistencia</a>
+              <a class="nav-link " href="asistencia_index.php">Asistencia</a>
             </li>
             <!-- ------------------------------------------------------- -->
+            <li class="nav-item  pr-3">
+              <a class="nav-link" href="admin_index.php">Administradores</a>
+            </li>
           </ul>     
           <!-- ------------------------------------------------------- -->
           <form class="form-inline d-flex justify-content-end">
