@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 30-07-2024 a las 19:48:26
+-- Tiempo de generación: 30-07-2024 a las 20:05:09
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -31,8 +31,16 @@ CREATE TABLE `asignaturas` (
   `id` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
   `cantidaddehoras` int(11) NOT NULL,
-  `etapa` varchar(15) NOT NULL
+  `etapa` varchar(15) NOT NULL,
+  `FK_carrera` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `asignaturas`
+--
+
+INSERT INTO `asignaturas` (`id`, `nombre`, `cantidaddehoras`, `etapa`, `FK_carrera`) VALUES
+(1, 'Programacion', 3, 'Activo', 2);
 
 -- --------------------------------------------------------
 
@@ -60,6 +68,13 @@ CREATE TABLE `carreras` (
   `descripcion` varchar(255) NOT NULL,
   `etapa` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `carreras`
+--
+
+INSERT INTO `carreras` (`id`, `nombre`, `descripcion`, `etapa`) VALUES
+(2, 'Desarrollo de Software', '--', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -193,7 +208,8 @@ INSERT INTO `usuarios` (`id`, `password`, `correo`, `nombre`, `id_permisos`) VAL
 -- Indices de la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_carrera` (`FK_carrera`);
 
 --
 -- Indices de la tabla `asistencias`
@@ -271,7 +287,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `asistencias`
@@ -283,7 +299,7 @@ ALTER TABLE `asistencias`
 -- AUTO_INCREMENT de la tabla `carreras`
 --
 ALTER TABLE `carreras`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `dicta`
@@ -324,6 +340,12 @@ ALTER TABLE `usuarios`
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `asignaturas`
+--
+ALTER TABLE `asignaturas`
+  ADD CONSTRAINT `fk_carrera` FOREIGN KEY (`FK_carrera`) REFERENCES `carreras` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
 
 --
 -- Filtros para la tabla `asistencias`
