@@ -2,8 +2,8 @@
 include '../../conn/connection.php';
 
 // Variables para almacenar los valores del formulario y mensajes de error
-$profesor_id = $materia_id = $tipo = $baja = $fecha_baja = $motivo_baja = "";
-$error = "";
+$profesor_id = $materia_id = $tipo = $error = "";
+$etapa = "activo";
 
 // Procesamiento del formulario cuando se envía
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -11,9 +11,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $profesor_id = trim($_POST["profesor_id"]);
     $materia_id = trim($_POST["materia_id"]);
     $tipo = trim($_POST["tipo"]);
-    $baja = isset($_POST["baja"]) ? "SI" : "NO";
-    $fecha_baja = !empty($_POST["fecha_baja"]) ? trim($_POST["fecha_baja"]) : NULL;
-    $motivo_baja = !empty($_POST["motivo_baja"]) ? trim($_POST["motivo_baja"]) : NULL;
 
     // Validar campos obligatorios
     if (empty($profesor_id) || empty($materia_id) || empty($tipo)) {
@@ -21,17 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         try {
             // Inserta datos en la tabla dicta
-            $sql = "INSERT INTO dicta (FKprofesor, FKmateria, tipo, Baja, Fecha_baja, motivo_baja) 
-                    VALUES (:profesor_id, :materia_id, :tipo, :baja, :fecha_baja, :motivo_baja)";
+            $sql = "INSERT INTO dicta (FKprofesor, FKmateria, tipo, etapa) 
+                    VALUES (:profesor_id, :materia_id, :tipo, :etapa)";
             
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':profesor_id', $profesor_id);
             $stmt->bindParam(':materia_id', $materia_id);
             $stmt->bindParam(':tipo', $tipo);
-            $stmt->bindParam(':baja', $baja);
-            $stmt->bindParam(':fecha_baja', $fecha_baja);
-            $stmt->bindParam(':motivo_baja', $motivo_baja);
-
+            $stmt->bindParam(':etapa', $etapa);
             if ($stmt->execute()) {
                 header("Location: dicta_index.php?mensaje=" . urlencode("Asignación agregada con éxito."));
                 exit();
@@ -86,18 +80,6 @@ $result_materias = $db->query($query_materias);
                         <option value="suplente">Suplente</option>
                     </select>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="baja">Baja:</label>
-                    <input type="checkbox" name="baja" value="SI" <?php echo $baja == "SI" ? 'checked' : ''; ?>> Marcar si tiene baja
-                </div>
-                <div class="form-group">
-                    <label for="fecha_baja">Fecha de Baja:</label>
-                    <input type="date" name="fecha_baja" class="form-control" value="<?php echo htmlspecialchars($fecha_baja); ?>">
-                </div>
-                <div class="form-group">
-                    <label for="motivo_baja">Motivo de Baja:</label>
-                    <textarea name="motivo_baja" class="form-control"><?php echo htmlspecialchars($motivo_baja); ?></textarea>
-                </div> -->
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <?php if (!empty($error)) : ?>
                     <div class="alert alert-danger mt-3"><?php echo $error; ?></div>
