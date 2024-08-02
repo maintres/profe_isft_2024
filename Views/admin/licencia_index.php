@@ -28,16 +28,21 @@ $resultado = mysqli_query($conexion, $SQl);
                             while ($filas = mysqli_fetch_assoc($resultado)) {
                             ?>
                                 <tr class="col-sm">
-                                    <td><?php echo $filas['id'];?></td>
-                                    <td><?php echo $filas['nombre'];?></td>
-                                    <td><?php echo $filas['fechadeinicio'];?></td>
-                                    <td><?php echo $filas['fechadefin'];?></td>
+                                    <td><?php echo $filas['id']; ?></td>
+                                    <td><?php echo $filas['nombre']; ?></td>
+                                    <td><?php echo $filas['fechadeinicio']; ?></td>
+                                    <td><?php echo $filas['fechadefin']; ?></td>
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <button class="btn btn-warning btn-sm">
-                                                <?php echo '<a href="carrera_edit.php?id=' . $filas['id'] . '"><i class="fas fa-edit"></i></a>'; ?>
+                                                <?php echo '<a href="licencia_edit.php?id=' . $filas['id'] . '"><i class="fas fa-edit"></i></a>'; ?>
                                             </button>
-                                            <button><a href="">Eliminar</a></button>
+                                            <button class="btn btn-danger">
+                                                <a href="proceso/SuprimirLicencia.php?id=<?php echo $filas['id']; ?>" onClick="return confirm('¿Seguro de esta acción? ID <?php echo $filas['id']; ?> será eliminado y una vez eliminado no se podrá recuperar...');">
+                                                <i class="fas fa-trash"></i>
+                                                </a>
+                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>
