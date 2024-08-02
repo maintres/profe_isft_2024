@@ -28,6 +28,8 @@ include("../../conn/connection.php");
         <input class="form-control datepicker-date" type="date" name="Finicio" id="">
         <p>Fecha de fin</p>
         <input class="form-control datepicker-date" type="date" name="Ffin" id=""><br>
+          <!-- -------------------Para conectar con tipo de licencias----------------------------- -->
+        <input type="hidden" id="" name="idtipos_licencias" value="">
         <input class="btn btn-primary" type="submit" value="Guardar" />
       </form>
     </b>

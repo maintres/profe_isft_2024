@@ -2,16 +2,27 @@
 include("../../conn/connection.php");
 require("navbar.php");
 
-#-------------------------------------------------------------------------------------
 if (isset($_POST['Enviar'])) {
+    $idtipos_licencias = $_POST['idtipos_licencias'];
     $id = $_POST['id'];
     $profesor = $_POST['profesor'];
     $FechaInicio = $_POST['Finicio'];
     $FechaFin = $_POST['Ffin'];
 
-    $SQL = "UPDATE licencias SET nombre=?, fechainicio=?, fechafin=? WHERE id=?";
+    # Asignar NULL si idtipos_licencias está vacío
+    if (empty($idtipos_licencias)) {
+        $idtipos_licencias = NULL;
+    }
+
+    $SQL = "UPDATE licencias SET nombre=?, fechadeinicio=?, fechadefin=?, idtipos_licencias=? WHERE id=?";
     $sentenciaPreparada = mysqli_prepare($conexion, $SQL);
-    mysqli_stmt_bind_param($sentenciaPreparada, "sssi", $profesor, $FechaInicio, $FechaFin, $id);
+
+    # Cambiar el tipo de enlace para que soporte NULL
+    if ($idtipos_licencias === NULL) {
+        mysqli_stmt_bind_param($sentenciaPreparada, "sssii", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id);
+    } else {
+        mysqli_stmt_bind_param($sentenciaPreparada, "sssii", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id);
+    }
 
     if (mysqli_stmt_execute($sentenciaPreparada)) {
         echo "<script language='JavaScript'>
@@ -34,9 +45,12 @@ if (isset($_POST['Enviar'])) {
 
     $resultado = mysqli_stmt_get_result($sentenciaPreparada);
     $fila = mysqli_fetch_assoc($resultado);
-    $profesor = $fila['nombre'];
-    $FechaInicio = $fila['fechainicio'];
-    $FechaFin = $fila['fechafin'];
+    
+    // Verificar si las claves existen antes de usarlas
+    $profesor = isset($fila['nombre']) ? $fila['nombre'] : '';
+    $FechaInicio = isset($fila['fechadeinicio']) ? $fila['fechadeinicio'] : '';
+    $FechaFin = isset($fila['fechadefin']) ? $fila['fechadefin'] : '';
+
     mysqli_stmt_close($sentenciaPreparada);
 }
 ?>
@@ -68,8 +82,9 @@ if (isset($_POST['Enviar'])) {
                 <p>Fecha de fin</p>
                 <input class="form-control datepicker-date" type="date" name="Ffin" value="<?php echo $FechaFin; ?>"><br>
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
+                <input type="hidden" id="idtipos_licencias" name="idtipos_licencias" value="">
                 <input class="btn btn-primary" type="submit" name="Enviar" value="Guardar Cambios">
-                <button class="btn btn-warning"><a href="">Volver al Listado</a></button>
+                <button class="btn btn-warning"><a href="licencia_index.php">Volver al Listado</a></button>
             </form>
         </div>
     </div>
