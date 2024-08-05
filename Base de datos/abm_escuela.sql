@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 30-07-2024 a las 20:05:09
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 06-08-2024 a las 01:39:06
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -93,6 +93,13 @@ CREATE TABLE `dicta` (
   `etapa` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `dicta`
+--
+
+INSERT INTO `dicta` (`id`, `FKprofesor`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `etapa`) VALUES
+(1, 1, 1, 'titular', NULL, NULL, NULL, 'activo');
+
 -- --------------------------------------------------------
 
 --
@@ -108,6 +115,13 @@ CREATE TABLE `licencias` (
   `idtipos_licencias` int(11) NOT NULL,
   `etapa` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `licencias`
+--
+
+INSERT INTO `licencias` (`id`, `nombre`, `fechadeinicio`, `fechadefin`, `idprofesor`, `idtipos_licencias`, `etapa`) VALUES
+(2, 'd', '2024-08-08', '0000-00-00', 2, 7, '');
 
 -- --------------------------------------------------------
 
@@ -143,6 +157,15 @@ CREATE TABLE `profesores` (
   `etapa` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+--
+-- Volcado de datos para la tabla `profesores`
+--
+
+INSERT INTO `profesores` (`id`, `nombreyapellido`, `dni`, `domicilio`, `telefono`, `email`, `foto`, `cv`, `fechadeingreso`, `fechadebaja`, `etapa`) VALUES
+(1, 'maxi', '38015715', 'brasi', '4', 'maxiolmos1993@gmail.com', '', '', '2024-08-16', '0000-00-00', 'Activo'),
+(2, 'd', '2', 'd', '2', 'dem23@gmail.com', '', '', '2024-08-19', '0000-00-00', 'Activo'),
+(3, 'g', '34', 'g', '4', 'fer.olmos93@gmail.com', '', '', '2024-08-16', '0000-00-00', 'Activo');
+
 -- --------------------------------------------------------
 
 --
@@ -175,8 +198,18 @@ CREATE TABLE `profesores_carreras` (
 CREATE TABLE `tipos_licencias` (
   `id` int(11) NOT NULL,
   `tipodelicencia` varchar(254) NOT NULL,
-  `descripcion` varchar(255) NOT NULL
+  `descripcion` varchar(255) NOT NULL,
+  `etapa` varchar(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tipos_licencias`
+--
+
+INSERT INTO `tipos_licencias` (`id`, `tipodelicencia`, `descripcion`, `etapa`) VALUES
+(5, 'Medica', 'ninguna', 'Inactivo'),
+(6, 'discapasidad', 'jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj', 'Inactivo'),
+(7, 'Enfermedad', '', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -305,13 +338,13 @@ ALTER TABLE `carreras`
 -- AUTO_INCREMENT de la tabla `dicta`
 --
 ALTER TABLE `dicta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `licencias`
 --
 ALTER TABLE `licencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
@@ -323,13 +356,13 @@ ALTER TABLE `permisos`
 -- AUTO_INCREMENT de la tabla `profesores`
 --
 ALTER TABLE `profesores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_licencias`
 --
 ALTER TABLE `tipos_licencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
