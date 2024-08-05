@@ -83,6 +83,21 @@ function eliminar_carrera (id_carrera){
     });
 }
 
+function elimina_licencia (id_carrera){
+  Swal.fire({
+      icon: "error",
+      title: "¿Borrar?",        
+      showCancelButton: true,
+      confirmButtonText: "Si",   
+      confirmButtonColor: "#007bff",
+      cancelButtonColor: '#dc3545',     
+    }).then((result) => {  
+          if (result.isConfirmed) { 
+            window.location = "../admin/licencia_tipo_index.php?txtID="+id_carrera;
+           }          
+    });
+}
+
 
 
 

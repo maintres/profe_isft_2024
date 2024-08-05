@@ -1,16 +1,15 @@
 <?php
 require '../../conn/connection.php'; 
-//-------------BORRADO------------------ 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : "";
-    $sentencia = $db->prepare("DELETE FROM profesores WHERE id = :id");
-    $sentencia->bindParam(':id', $txtID);
-    $sentencia->execute();
-    $mensaje = "Registro de Profesor Eliminado";
-    header("Location: profe_index.php?mensaje=" . $mensaje);
-    exit;
-}
 require 'navbar.php';
+//-------------BORRADO------------------ 
+if(isset($_GET['txtID'])){
+    $txtID=(isset($_GET['txtID']))?$_GET['txtID']:"";
+    $sentencia=$db->prepare("UPDATE profesores SET etapa = 'Inactivo' WHERE id = :id" );
+    $sentencia->bindParam(':id',$txtID);
+    $sentencia->execute();
+    $mensaje="Registro Profesor Eliminado";
+    header("Location:profe_index.php?mensaje=".$mensaje);
+  }
 ?>
 <!-- ------------------------------------------- -->
 <section class="content mt-3">
@@ -41,7 +40,7 @@ require 'navbar.php';
                         <tbody>
                             <?php
                             try {
-                                $query = "SELECT * FROM profesores";
+                                $query = "SELECT * FROM profesores WHERE etapa = 'Activo'";
                                 $stmt = $db->prepare($query);
                                 $stmt->execute();
                                 $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
