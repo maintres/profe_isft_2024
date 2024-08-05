@@ -16,10 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Recolecta datos del formulario
     $nombre = $_POST["nombre"];
     $correo = $_POST["correo"];
-    $password = $_POST["password"];
-    
+    $password = $_POST["password"];    
     $id_permisos = "1"; // Valor predeterminado para alumno es 1.
-
     $error = "";
     try {
         // Verificar si el correo electrónico ya existe

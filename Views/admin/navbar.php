@@ -155,8 +155,14 @@ if(!isset($_SESSION['nombre'])){
               <a class="nav-link" href="dicta_index.php">Dicta</a>
             </li>
              <!-- ------------------------------------------------------- -->
-             <li class="nav-item  pr-3">
-              <a class="nav-link" href="licencia_index.php">Licencias</a>
+            <li class="nav-item dropdown pr-3">
+              <a class="nav-link dropdown-toggle  " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Licencias
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="licencia_index.php">Agrega Licencia</a></li>
+                <li><a class="dropdown-item" href="licencia_tipo_index.php">Agrega Tipo Llicencia</a></li>
+              </ul>
             </li>
             <!-- ------------------------------------------------------- -->
             <li class="nav-item  pr-3">
