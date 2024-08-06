@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-08-2024 a las 07:05:31
--- Versión del servidor: 10.4.28-MariaDB
--- Versión de PHP: 8.2.4
+-- Tiempo de generación: 06-08-2024 a las 20:28:17
+-- Versión del servidor: 10.4.22-MariaDB
+-- Versión de PHP: 8.1.2
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -33,7 +33,7 @@ CREATE TABLE `asignaturas` (
   `cantidaddehoras` int(11) NOT NULL,
   `etapa` varchar(15) NOT NULL,
   `FK_carrera` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `asignaturas`
@@ -55,7 +55,7 @@ CREATE TABLE `asistencias` (
   `fecha` date NOT NULL,
   `estado` varchar(25) NOT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `asistencias`
@@ -78,7 +78,7 @@ CREATE TABLE `carreras` (
   `nombre` varchar(255) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `carreras`
@@ -102,7 +102,7 @@ CREATE TABLE `dicta` (
   `Fecha_baja` date DEFAULT NULL,
   `motivo_baja` varchar(255) DEFAULT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `dicta`
@@ -125,7 +125,7 @@ CREATE TABLE `licencias` (
   `idprofesor` int(11) NOT NULL,
   `idtipos_licencias` int(11) NOT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `licencias`
@@ -147,7 +147,7 @@ CREATE TABLE `permisos` (
   `descripcion` varchar(255) NOT NULL,
   `fecha_creacion` datetime DEFAULT NULL,
   `fecha_modificacion` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -167,7 +167,7 @@ CREATE TABLE `profesores` (
   `fechadeingreso` date NOT NULL,
   `fechadebaja` date DEFAULT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `profesores`
@@ -176,7 +176,8 @@ CREATE TABLE `profesores` (
 INSERT INTO `profesores` (`id`, `nombreyapellido`, `dni`, `domicilio`, `telefono`, `email`, `foto`, `cv`, `fechadeingreso`, `fechadebaja`, `etapa`) VALUES
 (1, 'maxi', '38015715', 'brasi', '4', 'maxiolmos1993@gmail.com', '', '', '2024-08-16', '0000-00-00', 'Activo'),
 (2, 'd', '2', 'd', '2', 'dem23@gmail.com', '', '', '2024-08-19', '0000-00-00', 'Activo'),
-(3, 'g', '34', 'g', '4', 'fer.olmos93@gmail.com', '', '', '2024-08-16', '0000-00-00', 'Activo');
+(3, 'g', '34', 'g', '4', 'fer.olmos93@gmail.com', '', '', '2024-08-16', '2024-08-06', 'Inactivo'),
+(4, 'Hernan A', '44634317', 'calle 21 de febrero', '2645677654', 'hernanandrada277@gmail.com', '9taPAiQkRduEpjE4Ol_7xQ.jpg', 'iulNj9t_Q325IIgq6ouhog.jpg', '2024-02-21', NULL, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -188,7 +189,7 @@ CREATE TABLE `profesores_asignaturas` (
   `id_profesor` int(11) NOT NULL,
   `id_asignatura` int(11) NOT NULL,
   `cantidad_horas` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -199,7 +200,7 @@ CREATE TABLE `profesores_asignaturas` (
 CREATE TABLE `profesores_carreras` (
   `id_profesor` int(11) NOT NULL,
   `id_carrera` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -212,7 +213,7 @@ CREATE TABLE `tipos_licencias` (
   `tipodelicencia` varchar(254) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `etapa` varchar(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `tipos_licencias`
@@ -236,7 +237,7 @@ CREATE TABLE `usuarios` (
   `nombre` varchar(255) DEFAULT NULL,
   `id_permisos` int(11) NOT NULL,
   `etapa` varchar(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `usuarios`
@@ -372,7 +373,7 @@ ALTER TABLE `permisos`
 -- AUTO_INCREMENT de la tabla `profesores`
 --
 ALTER TABLE `profesores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_licencias`
