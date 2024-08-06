@@ -23,8 +23,8 @@ $conexion->close();
 }
 ?>
 <!-- ----------------------------------------------------- -->
-<div class="container mt-3">
-  <div class="card rounded-2 border-0">
+<div class="container mt-3 w-50">
+  <div class="card rounded-2 border-0 row d-flex justify-content-center">
     <h5 class="card-header bg-dark text-white">Formulario de agregar carreras</h5>
     <div class="card-body bg-light">
       <form class="form-group" action="" method="post">

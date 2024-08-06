@@ -83,7 +83,7 @@ function eliminar_carrera (id_carrera){
     });
 }
 
-function elimina_licencia (id_carrera){
+function elimina_licencia_tipo (id_licencia_tipo){
   Swal.fire({
       icon: "error",
       title: "¿Borrar?",        
@@ -93,7 +93,21 @@ function elimina_licencia (id_carrera){
       cancelButtonColor: '#dc3545',     
     }).then((result) => {  
           if (result.isConfirmed) { 
-            window.location = "../admin/licencia_tipo_index.php?txtID="+id_carrera;
+            window.location = "../admin/licencia_tipo_index.php?txtID="+id_licencia_tipo;
+           }          
+    });
+}
+function elimina_licencia (id_licencia){
+  Swal.fire({
+      icon: "error",
+      title: "¿Borrar?",        
+      showCancelButton: true,
+      confirmButtonText: "Si",   
+      confirmButtonColor: "#007bff",
+      cancelButtonColor: '#dc3545',     
+    }).then((result) => {  
+          if (result.isConfirmed) { 
+            window.location = "../admin/licencia_index.php?txtID="+id_licencia;
            }          
     });
 }

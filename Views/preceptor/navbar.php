@@ -69,7 +69,7 @@ if(!isset($_SESSION['nombre'])){
   $mensaje = isset($_GET['mensaje']) ? $_GET['mensaje'] : '';
   $error = isset($_GET['error']) ? $_GET['error'] : '';
   ?>
-  <!-- Muestra la alerta para mensajes de éxito -->
+  <!-- ------------------------------------------------------- -->
   <?php if (!empty($mensaje)) { ?>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
@@ -87,8 +87,7 @@ if(!isset($_SESSION['nombre'])){
       });
     </script>
   <?php } ?>
-
-  <!-- Muestra la alerta para errores -->
+  <!-- ------------------------------------------------------- -->
   <?php if (!empty($error)) { ?>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
@@ -121,52 +120,25 @@ if(!isset($_SESSION['nombre'])){
         <!-- ------------------------------------------------------- -->
         <div class="collapse navbar-collapse d-flex" id="navbarNav">
           <ul class="navbar-nav mr-auto flex-grow-1 bd-highlight">
-
             <div class="collapse navbar-collapse " id="navbarNav">
               <ul class="navbar-nav mr-auto ">
-            <!-- ------------------------------------------------------- -->
-            <!-- <li class="nav-item dropdown pr-3">
-              <a class="nav-link dropdown-toggle  " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Profesor
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="profe_crea.php">Agregar Profesor</a></li>
-                <li><a class="dropdown-item" href="profe_index.php">Listado de Profesores</a></li>
-                <li><a class="dropdown-item" href="asigna_index.php">Listado de Asignaciones</a></li>
-              </ul>
-            </li> -->
-            <!-- -------------------------------- -->
-            <li class="nav-item dropdown pr-3">
-              <a class="nav-link dropdown-toggle  " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Registrar
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="profe_index.php">Profesores</a></li>
-                <li><a class="dropdown-item" href="materia_index.php">Asignaturas</a></li>
-                <li><a class="dropdown-item" href="carrera_index.php">Carreras</a></li>
-                <li><a class="dropdown-item" href="admin_index.php">Admin y/o Preceptor</a></li>
-              </ul>
+            <!-- ------------------------------- -->
+            <li class="nav-item  pr-3">
+              <a class="nav-link " href="profe_index.php">Profesores</a>
             </li>
              <!-- --------------------------- -->            
-             <li class="nav-item  pr-3">
+            <li class="nav-item  pr-3">
               <a class="nav-link " href="asistencia_index.php">Asistencia</a>
             </li>
             <!-- ------------------------------------------------------- -->
             <li class="nav-item  pr-3">
-              <a class="nav-link" href="dicta_index.php">Asignaciónes</a>
+              <a class="nav-link" href="dicta_index.php">Asignaciones</a>
             </li>
              <!-- ------------------------------------------------------- -->
-            <li class="nav-item dropdown pr-3">
-              <a class="nav-link dropdown-toggle  " href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Licencias
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="licencia_index.php">Agrega Licencia</a></li>
-                <li><a class="dropdown-item" href="licencia_tipo_index.php">Agrega Tipo Llicencia</a></li>
-              </ul>
+             <li class="nav-item  pr-3">
+              <a class="nav-link" href="licencia_index.php">Agrega Licencia</a>
             </li>
-            <!-- ------------------------------------------------------- -->
-            
+            <!-- ------------------------------------------------------- -->            
           </ul>     
           <!-- ------------------------------------------------------- -->
           <form class="form-inline d-flex justify-content-end">
@@ -176,7 +148,7 @@ if(!isset($_SESSION['nombre'])){
                   <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <!-- iconos sacados de "fontawesome" -->
                     <i class="fas fa-user pr-2"></i>
-                    Administrador:
+                    Preceptor:
                     <?php if (isset($_SESSION['nombre']) ) : ?>                    
                     <?php echo $_SESSION['nombre'] ; ?>
                     <?php endif; ?>
