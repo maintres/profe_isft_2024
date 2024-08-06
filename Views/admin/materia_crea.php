@@ -61,9 +61,9 @@ $stmt_carreras->execute();
 $carreras = $stmt_carreras->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<?php require 'navbar.php'; ?>
-<div class="container mt-3">
-    <div class="card rounded-2 border-0">
+<?php require 'navbar.php' ; ?>
+<div class="container mt-3 w-50">
+    <div class="card rounded-2 border-0 row d-flex justify-content-center">
         <h5 class="card-header bg-dark text-white">Formulario de Inscripción de Materia</h5>
         <div class="card-body bg-light">
             <?php

@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <td><?php echo $usuarios['descripcion'] ?></td>
                                             <td class="text-center">
                                                 <div class="btn-group">
-                                                    <a href="javascript:elimina_licencia(<?php echo $usuarios['id'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
+                                                    <a href="javascript:elimina_licencia_tipo(<?php echo $usuarios['id'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
                                                     <i class="fas fa-trash"></i>
                                                     </a> 
                                                 </div>  
@@ -112,12 +112,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <!-- --------------------------------- -->                
                                         <div class="form-group">
                                             <label for="tipodelicencia">Nombre</label>
-                                            <input type="text" class="form-control" name="tipodelicencia" value="" autocomplete="off" placeholder="Ingrese tipodelicencia" required>
+                                            <input type="text" class="form-control" name="tipodelicencia" value="" autocomplete="off" placeholder="Ingrese nombre de licencia" required>
                                         </div>                                            
                                 <!-- --------------------------------- -->                
                                         <div class="form-group">
                                             <label for="descripcion">Descripcion:</label>
-                                            <input id="descripcion" class="form-control" name="descripcion" placeholder="Ingrese Descripcion" autocomplete="off" value="" >
+                                            <input id="descripcion" class="form-control" name="descripcion" placeholder="Ingrese descripción" autocomplete="off" value="" >
                                             
                                         </div>                                                        
                                 <!-- --------------------------------- -->

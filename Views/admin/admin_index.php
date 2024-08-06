@@ -3,10 +3,10 @@ require '../../conn/connection.php';
 //-------------BORRADO------------------ 
 if(isset($_GET['txtID'])){
   $txtID=(isset($_GET['txtID']))?$_GET['txtID']:"";
-  $sentencia=$db->prepare("UPDATE usuarios SET estado = 'Inactivo' WHERE id = :id" );
+  $sentencia=$db->prepare("UPDATE usuarios SET etapa = 'Inactivo' WHERE id = :id" );
   $sentencia->bindParam(':id',$txtID);
   $sentencia->execute();
-  $mensaje="Registro Administrador Eliminado";
+  $mensaje="Registro Eliminado con Exito";
   header("Location:admin_index.php?mensaje=".$mensaje);
 }
 ?>
@@ -17,7 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = $_POST["nombre"];
     $correo = $_POST["correo"];
     $password = $_POST["password"];    
-    $id_permisos = "1"; // Valor predeterminado para alumno es 1.
+    $etapa = "Activo";
+    $id_permisos = $_POST["permiso"]; // Valor predeterminado para alumno es 1.
     $error = "";
     try {
         // Verificar si el correo electrónico ya existe
@@ -37,14 +38,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         } else {
             // Inserta datos en la base de datos
-            $sql = "INSERT INTO usuarios (nombre, correo, password, id_permisos ) 
-                    VALUES (:nombre, :correo, :password, :id_permisos)";
+            $sql = "INSERT INTO usuarios (nombre, correo, password, id_permisos, etapa ) 
+                    VALUES (:nombre, :correo, :password, :id_permisos, :etapa)";
 
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':nombre', $nombre); 
             $stmt->bindParam(':correo', $correo);
             $stmt->bindParam(':password', $password);
             $stmt->bindParam(':id_permisos', $id_permisos);
+            $stmt->bindParam(':etapa', $etapa);
 
             if ($stmt->execute()) {
                 // Redirige a alumno_index.php con mensaje de éxito
@@ -68,112 +70,124 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 <!-- ------------------------------ -->
 <?php require 'navbar.php'; ?>
-    <section class="content mt-3">
-        <div class="row m-auto">
-            <div class="col-sm">
-                    <!-- -------------------- -->
-                        <div class="row">
-                            <div class="col">                                
-                            <div class="card rounded-2 border-0">
-                            <h5 class="card-header bg-dark text-white">Lista de Administradores</h5>                                
-                                <div class="card-body bg-light">
-                                <form id="inscripcionForm" action="" method="post">
-                            <table id="" class="table table-striped table-sm" style="width:100%">
+<!-- --------------------------------------- -->
+<section class="content mt-3">
+    <div class="row">
+        <div class="col mx-3">
+            <div class="row">
+                <div class="col">                                
+                    <div class="card rounded-2 border-0">
+                        <h5 class="card-header bg-dark text-white">Listado de Administrador y/o Preceptor</h5>                                
+                        <div class="card-body bg-light">
+                            <form id="inscripcionForm" action="" method="post">
+                                <table id="example" class="table table-striped table-sm" style="width:100%">
                                 <thead class="thead-dark">
                                     <th>#</th>
                                     <th>Nombres</th> 
-                                    <th>E-mail</th>                                    
-                                    <th>Acciones</th>               
+                                    <th>E-mail</th>                                           
+                                    <th>Permiso</th>                                   
+                                    <th>Acciones</th>         
                                 </thead>
                                 <tbody>
                                     <?php                                    
                                     try {
                                         $db = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_password);
                                         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                                        $query = "SELECT * FROM usuarios WHERE id_permisos = 1 ";
+                                        $query = "SELECT * FROM usuarios WHERE id_permisos = 1 AND etapa = 'Activo' OR id_permisos = 3 AND etapa = 'Activo' ";
                                         $stmt = $db->prepare($query);
                                         $stmt->execute();
                                         $usuarioss = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         foreach ($usuarioss as $usuarios) {
+                                            if($usuarios['id_permisos']===1){
+                                                $rol='Administrador';
+                                            }elseif($usuarios['id_permisos']===3){
+                                                $rol='Preceptor';
+                                            }
                                     ?>
                                             <tr>
-                                                <th scope="row"><?php echo $usuarios['id'] ?></th>
-                                                <td><?php echo $usuarios['nombre'] ?></td>
-                                                <td><?php echo $usuarios['correo'] ?></td>
-                                                <td class="text-center">
-                                                    <div class="btn-group">
-                                                        
-                                                        <a href="javascript:eliminar4(<?php echo $usuarios['id'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
-                                                            <i class="fas fa-trash"></i>
-                                                        </a> 
-                                                    </div>  
-                                                </td>
-                                            </tr>
-                                    <?php
+                                                    <th scope="row"><?php echo $usuarios['id'] ?></th>
+                                                    <td><?php echo $usuarios['nombre'] ?></td>
+                                                    <td><?php echo $usuarios['correo'] ?></td>
+                                                    <td><?php echo $rol ?></td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group">
+
+                                                            <a href="javascript:eliminar4(<?php echo $usuarios['id'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
+                                                                <i class="fas fa-trash"></i>
+                                                            </a> 
+                                                        </div>  
+                                                    </td>
+                                                </tr>
+                                        <?php
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "Error de conexión: " . $e->getMessage();
                                         }
-                                    } catch (PDOException $e) {
-                                        echo "Error de conexión: " . $e->getMessage();
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </form>
-                                </div>
-                            </div>
-                            
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </form>
                         </div>
-                            <div class="col">
-                            <div class="card rounded-2 border-0">
-                                <h5 class="card-header bg-dark text-white">Inscripción de Administrador</h5>
-                                <div class="card-body bg-light">
-                                    <?php
-                                    // Recupera el mensaje de error y los datos del formulario desde la URL
-                                    $error = isset($_GET["error"]) ? $_GET["error"] : "";
-                                    $nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
-                                    $correo = isset($_GET["correo"]) ? $_GET["correo"] : "";
-                                    ?>
-                                    <form id="formulario" action="" method="post" enctype="multipart/form-data">
-                                        <!-- --------------------------------- -->                
-                                                <div class="form-group">
-                                                    <label for="nombre">Nombre:</label>
-                                                    <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($nombre); ?>" autocomplete="off" placeholder="Ingrese Nombre(s)" required>
-                                                </div>
-                                            
-                                        <!-- --------------------------------- -->                
-                                                <div class="form-group">
-                                                    <label for="correo">correo:</label>
-                                                    <input id="correo" class="form-control" name="correo" placeholder="Ingrese correo" autocomplete="off" value="<?php echo htmlspecialchars($correo); ?> " required>
-                                                    <span id="correoOK"></span>
-                                                </div>
-                                            
-                                                <div class="form-group">
-                                                    <label for="password">password:</label>
-                                                    <div class="input-group">
-                                                        <input class="form-control bg-light d-inline-block" type="password" placeholder="password" name="password" id="password" autocomplete="off" required />
-                                                        <button type="button" class="btn btn-outline-primary" name="toggle-eye" id="toggle-eye" onclick="togglePasswordVisibility()">
-                                                            <i class="fas fa-eye p-1"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>                    
-                                        <!-- --------------------------------- -->
-                                        <!-- Agregamos un botón para guardar con un evento JavaScript -->
-                                        <button type="button" class="btn btn-primary float-right " id="guardarBtn" onclick="validarFormulario()">Guardar</button>
-                                        <!-- Agregamos un div para mostrar un mensaje de confirmación -->
-                                        <div id="confirmacion" style="display: none;">
-                                            <p>¿Seguro desea guardar los datos?</p>
-                                            <button type="button" class="btn btn-success" id="confirmarBtn">Sí</button>
-                                            <button type="button" class="btn btn-danger" id="cancelarBtn">No</button>
-                                        </div>
-                                    </form>
+                    </div>                      
+                </div>
+                <!-- --------------------------- -->
+
+                <div class="col">
+                    <div class="card rounded-2 border-0">
+                        <h5 class="card-header bg-dark text-white">Registro de Administrador y/o Preceptor</h5>
+                        <div class="card-body bg-light">
+                            <?php
+                            // Recupera el mensaje de error y los datos del formulario desde la URL
+                            $error = isset($_GET["error"]) ? $_GET["error"] : "";
+                            $nombre = isset($_GET["nombre"]) ? $_GET["nombre"] : "";
+                            $correo = isset($_GET["correo"]) ? $_GET["correo"] : "";
+                            ?>
+                            <form id="formulario" action="" method="post" enctype="multipart/form-data">
+                                <!-- --------------------------------- -->                
+                                <div class="form-group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($nombre); ?>" autocomplete="off" placeholder="Ingrese Nombre" required>
+                                </div>                                            
+                                <!-- --------------------------------- -->                
+                                <div class="form-group">
+                                    <label for="correo">Correo:</label>
+                                    <input id="correo" type="email" class="form-control" name="correo" placeholder="Ingrese Correo" value=" " required>
                                 </div>
-                            </div>
-                            </div>
-                        </div>                        
-                        <br>
-                        <br><br>
-                    </div>                
-        </div>
-    </section>
+                                <!-- ------------------------------- -->
+                                <div class="form-group">
+                                    <label for="permiso">Permisos/Roles:</label>
+                                    <select name="permiso" class="form-control">
+                                        <option value="1" selected>Administrador</option>
+                                        <option value="3">Preceptor</option>
+                                    </select>
+                                </div>  
+                                <!-- ------------------------- -->
+                                <div class="form-group">
+                                    <label for="password">Contraseña:</label>
+                                    <div class="input-group">
+                                        <input class="form-control bg-light d-inline-block" type="password" placeholder="Ingrese Contraseña" name="password" id="password" autocomplete="off" required />
+                                        <button type="button" class="btn btn-outline-primary" name="toggle-eye" id="toggle-eye" onclick="togglePasswordVisibility()">
+                                            <i class="fas fa-eye p-1"></i>
+                                        </button>
+                                    </div>
+                                </div>                    
+                                <!-- --------------------------------- -->
+                                <button type="button" class="btn btn-primary float-right " id="guardarBtn" onclick="validarFormulario()">Guardar</button>
+                                <!-- Agregamos un div para mostrar un mensaje de confirmación -->
+                                <div id="confirmacion" style="display: none;">
+                                    <p>¿Seguro desea guardar los datos?</p>
+                                    <button type="button" class="btn btn-success" id="confirmarBtn">Sí</button>
+                                    <button type="button" class="btn btn-danger" id="cancelarBtn">No</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>      
+        </div>                
+    </div>
+</section>
+<!-- -------------------------- -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <!-- <script src="js/ocultarMensaje.js"></script>     -->
 <script src="../../js/contraseña.js"></script>

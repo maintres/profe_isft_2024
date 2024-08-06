@@ -1,7 +1,7 @@
 <?php
 require '../../conn/connection.php'; 
-
-// Procesar la eliminación y actualización de etapa
+require 'navbar.php';
+// ---------------------------------
 if (isset($_GET['txtID'])) {
     $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : "";
     $sentencia = $db->prepare("UPDATE asignaturas SET etapa = 'Inactivo' WHERE id = :id");
@@ -11,30 +11,7 @@ if (isset($_GET['txtID'])) {
     header("Location:materia_index.php?mensaje=" . urlencode($mensaje));
     exit;
 }
-
-require 'navbar.php';
-
-// Capturar la etapa seleccionada del filtro, por defecto se muestran todos
-$etapa = isset($_GET['etapa']) ? $_GET['etapa'] : 'Todos';
-
-// Consulta para obtener todas las asignaturas con filtro de etapa
-$query = "SELECT * FROM asignaturas";
-
-if ($etapa == 'Activo' || $etapa == 'Inactivo') {
-    $query .= " WHERE etapa = :etapa";
-}
-
-$query .= " ORDER BY id DESC";
-$stmt = $db->prepare($query);
-
-if ($etapa == 'Activo' || $etapa == 'Inactivo') {
-    $stmt->bindParam(':etapa', $etapa);
-}
-
-$stmt->execute();
-$materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!-- ------------------------------------------- -->
 <section class="content mt-3">
     <div class="row m-auto">
@@ -45,19 +22,6 @@ $materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <a class="btn btn-primary float-right mb-2" href="materia_crea.php">Registro de Materia</a>
                 </div>
                 <div class="card-body table-responsive">
-                    <!-- Formulario de Filtro -->
-                    <form method="get" action="materia_index.php" class="mb-3">
-                        <div class="form-group">
-                            <label for="etapa">Filtrar por Etapa:</label>
-                            <select name="etapa" id="etapa" class="form-control" onchange="this.form.submit()">
-                                <option value="Todos" <?php if ($etapa == 'Todos') echo 'selected'; ?>>Todos</option>
-                                <option value="Activo" <?php if ($etapa == 'Activo') echo 'selected'; ?>>Activo</option>
-                                <option value="Inactivo" <?php if ($etapa == 'Inactivo') echo 'selected'; ?>>Inactivo</option>
-                            </select>
-                        </div>
-                    </form>
-
-                    <!-- Tabla de Materias -->
                     <table id="example" class="table table-striped table-sm" style="width:100%">
                         <thead class="thead-dark">
                             <tr>
@@ -69,9 +33,15 @@ $materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </thead>
                         <tbody>
                             <?php
-                            foreach ($materias as $materia) {
+                            try {
+                                $query = "SELECT * FROM asignaturas WHERE etapa = 'Activo'";
+                                $stmt = $db->prepare($query);
+                                $stmt->execute();
+                                $materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                foreach ($materias as $materia) {
                             ?>
-                                <tr>    
+                                    <tr>
                                     <td><?php echo htmlspecialchars($materia['id'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($materia['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($materia['cantidaddehoras'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -90,8 +60,11 @@ $materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <?php } ?>
                                         </div>
                                     </td>
-                                </tr>
+                                    </tr>
                             <?php
+                                }
+                            } catch (PDOException $e) {
+                                error_log("Error al obtener las materias: " . $e->getMessage());
                             }
                             ?>
                         </tbody>
@@ -101,7 +74,6 @@ $materias = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </section>
-
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="js/ocultarMensaje.js"></script>
 <script>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-08-2024 a las 01:39:06
+-- Tiempo de generación: 06-08-2024 a las 07:05:31
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -40,7 +40,8 @@ CREATE TABLE `asignaturas` (
 --
 
 INSERT INTO `asignaturas` (`id`, `nombre`, `cantidaddehoras`, `etapa`, `FK_carrera`) VALUES
-(1, 'Programacion', 3, 'Activo', 2);
+(1, 'Programacion', 3, 'Activo', 2),
+(2, 'matematicas', 2, 'Activo', 2);
 
 -- --------------------------------------------------------
 
@@ -55,6 +56,16 @@ CREATE TABLE `asistencias` (
   `estado` varchar(25) NOT NULL,
   `etapa` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `asistencias`
+--
+
+INSERT INTO `asistencias` (`id`, `profesor_id`, `fecha`, `estado`, `etapa`) VALUES
+(3, 3, '2024-08-06', 'presente', ''),
+(4, 1, '2024-08-06', '', ''),
+(5, 2, '2024-08-06', 'ausente', ''),
+(6, 1, '2024-08-06', '', '');
 
 -- --------------------------------------------------------
 
@@ -121,7 +132,8 @@ CREATE TABLE `licencias` (
 --
 
 INSERT INTO `licencias` (`id`, `nombre`, `fechadeinicio`, `fechadefin`, `idprofesor`, `idtipos_licencias`, `etapa`) VALUES
-(2, 'd', '2024-08-08', '0000-00-00', 2, 7, '');
+(2, 'd', '2024-08-08', '0000-00-00', 2, 7, 'Inactivo'),
+(3, 'd', '2024-08-17', '0000-00-00', 2, 7, 'Inactivo');
 
 -- --------------------------------------------------------
 
@@ -222,16 +234,20 @@ CREATE TABLE `usuarios` (
   `password` varchar(255) NOT NULL,
   `correo` varchar(255) NOT NULL,
   `nombre` varchar(255) DEFAULT NULL,
-  `id_permisos` int(11) NOT NULL
+  `id_permisos` int(11) NOT NULL,
+  `etapa` varchar(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `password`, `correo`, `nombre`, `id_permisos`) VALUES
-(1, '1234', 'paablokenny20@gmail.com', 'Jaime', 2),
-(2, '1234', 'fjimenez@gmail.com', 'Fjimenez', 1);
+INSERT INTO `usuarios` (`id`, `password`, `correo`, `nombre`, `id_permisos`, `etapa`) VALUES
+(1, '123', 'paablokenny20@gmail.com', 'Jaime', 2, 'Activo'),
+(2, '123', 'fjimenez@gmail.com', 'Fjimenez', 1, 'Activo'),
+(3, '123', 'a@a.cd', 'd', 3, 'Activo'),
+(4, '123', 'maxi@gmail.com', 'maxi', 3, 'Activo'),
+(5, '123', '22a@a.cd', 'maxi', 1, 'Activo');
 
 --
 -- Índices para tablas volcadas
@@ -320,13 +336,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `asistencias`
 --
 ALTER TABLE `asistencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `carreras`
@@ -344,7 +360,7 @@ ALTER TABLE `dicta`
 -- AUTO_INCREMENT de la tabla `licencias`
 --
 ALTER TABLE `licencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
@@ -368,7 +384,7 @@ ALTER TABLE `tipos_licencias`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

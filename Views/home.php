@@ -31,7 +31,7 @@ if($_POST){
                 }else if ($usuario['id_permisos'] == 2){
                     header('Location: docente/index.php');
                     exit;
-                }else{
+                }else if ($usuario['id_permisos'] == 3){
                     header('Location: preceptor/index.php');
                     exit;
                 }                
@@ -73,8 +73,11 @@ if($_POST){
             <img src="../img/LOGO.ico" alt="login-icon" style="height: 10rem" class=" w-100 mb-4" />
         </div>
         <div class="text-center fs-1 fw-bold">Bienvenid@</div>
+        <p>ADMINISTRADOR:</p>
         <p>fjimenez@gmail.com</p>
-        <p>1234</p>
+        <p>PRECEPTOR</p>
+        <p>maxi@gmail.com</p>
+        <p>123</p>
         <form method="post" class="form" action="">
             <div class="input-group mt-4">
                 <div class="input-group-text bg-info">
