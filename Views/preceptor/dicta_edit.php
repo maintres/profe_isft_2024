@@ -2,26 +2,35 @@
 include '../../conn/connection.php';
 
 // Variables para almacenar los valores del formulario y mensajes de error
-$id = $profesor_id = $materia_id = $tipo = $baja = $fecha_baja = $motivo_baja = "";
-$error = "";
+$id = $profesor_id = $materia_id = $tipo = $carrera_id = $error = "";
+$baja = $fecha_baja = $motivo_baja = "";
+$etapa = "Activo"; // Por defecto se establece como activo
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
     // Obtener los datos actuales del registro
-    $sql = "SELECT * FROM dicta WHERE id = :id";
+    $sql = "SELECT d.*, u.nombre, u.apellido, u.dni 
+            FROM dicta d 
+            JOIN usuarios u ON d.usuario_id = u.id_usuario 
+            WHERE d.id = :id";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $registro = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($registro) {
-        $profesor_id = $registro['FKprofesor'];
+        $profesor_id = $registro['usuario_id'];
         $materia_id = $registro['FKmateria'];
         $tipo = $registro['tipo'];
+        $carrera_id = $registro['FK_carrera'];
         $baja = $registro['Baja'];
         $fecha_baja = $registro['Fecha_baja'];
         $motivo_baja = $registro['motivo_baja'];
+        $etapa = $registro['etapa'];
+        $nombre_profesor = $registro['nombre'];
+        $apellido_profesor = $registro['apellido'];
+        $dni_profesor = $registro['dni'];
     } else {
         echo "Registro no encontrado.";
         exit();
@@ -34,25 +43,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $profesor_id = trim($_POST["profesor_id"]);
     $materia_id = trim($_POST["materia_id"]);
     $tipo = trim($_POST["tipo"]);
+    $carrera_id = trim($_POST["carrera_id"]);
     $baja = isset($_POST["baja"]) ? "SI" : "NO";
     $fecha_baja = !empty($_POST["fecha_baja"]) ? trim($_POST["fecha_baja"]) : NULL;
     $motivo_baja = !empty($_POST["motivo_baja"]) ? trim($_POST["motivo_baja"]) : NULL;
+    $etapa = "Activo"; // Siempre activo a menos que se marque como inactivo
 
     // Validar campos obligatorios
-    if (empty($profesor_id) || empty($materia_id) || empty($tipo)) {
+    if (empty($profesor_id) || empty($materia_id) || empty($tipo) || empty($carrera_id)) {
         $error = "Por favor complete todos los campos obligatorios.";
     } else {
         try {
             // Actualizar datos en la tabla dicta
-            $sql = "UPDATE dicta SET FKprofesor = :profesor_id, FKmateria = :materia_id, tipo = :tipo, Baja = :baja, Fecha_baja = :fecha_baja, motivo_baja = :motivo_baja WHERE id = :id";
+            $sql = "UPDATE dicta 
+                    SET usuario_id = :profesor_id, FKmateria = :materia_id, tipo = :tipo, FK_carrera = :carrera_id, Baja = :baja, Fecha_baja = :fecha_baja, motivo_baja = :motivo_baja, etapa = :etapa 
+                    WHERE id = :id";
             
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':profesor_id', $profesor_id);
             $stmt->bindParam(':materia_id', $materia_id);
             $stmt->bindParam(':tipo', $tipo);
+            $stmt->bindParam(':carrera_id', $carrera_id);
             $stmt->bindParam(':baja', $baja);
             $stmt->bindParam(':fecha_baja', $fecha_baja);
             $stmt->bindParam(':motivo_baja', $motivo_baja);
+            $stmt->bindParam(':etapa', $etapa);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
@@ -67,12 +82,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Obtener listas de profesores y materias para select options
-$query_profesores = "SELECT id, nombreyapellido FROM profesores ORDER BY nombreyapellido";
-$result_profesores = $db->query($query_profesores);
-
+// Obtener listas de materias y carreras para select options
 $query_materias = "SELECT id, nombre FROM asignaturas ORDER BY nombre";
 $result_materias = $db->query($query_materias);
+
+$query_carreras = "SELECT id, nombre FROM carreras ORDER BY nombre";
+$result_carreras = $db->query($query_carreras);
 ?>
 
 <?php require 'navbar.php'; ?>
@@ -83,13 +98,12 @@ $result_materias = $db->query($query_materias);
         <div class="card-body bg-light">
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?id=" . $id; ?>">
                 <div class="form-group">
-                    <label for="profesor_id">Profesor:</label>
-                    <select name="profesor_id" class="form-control">
-                        <option value="">Seleccione un profesor</option>
-                        <?php while ($row = $result_profesores->fetch(PDO::FETCH_ASSOC)) : ?>
-                            <option value="<?php echo $row['id']; ?>" <?php echo $profesor_id == $row['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($row['nombreyapellido']); ?></option>
-                        <?php endwhile; ?>
-                    </select>
+                    <label for="nombre">Nombre del Profesor:</label>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($nombre_profesor) . ' ' . htmlspecialchars($apellido_profesor); ?>" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="dni">DNI del Profesor:</label>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($dni_profesor); ?>" readonly>
                 </div>
                 <div class="form-group">
                     <label for="materia_id">Materia:</label>
@@ -97,6 +111,15 @@ $result_materias = $db->query($query_materias);
                         <option value="">Seleccione una materia</option>
                         <?php while ($row = $result_materias->fetch(PDO::FETCH_ASSOC)) : ?>
                             <option value="<?php echo $row['id']; ?>" <?php echo $materia_id == $row['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($row['nombre']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="carrera_id">Carrera:</label>
+                    <select name="carrera_id" class="form-control">
+                        <option value="">Seleccione una carrera</option>
+                        <?php while ($row = $result_carreras->fetch(PDO::FETCH_ASSOC)) : ?>
+                            <option value="<?php echo $row['id']; ?>" <?php echo $carrera_id == $row['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($row['nombre']); ?></option>
                         <?php endwhile; ?>
                     </select>
                 </div>

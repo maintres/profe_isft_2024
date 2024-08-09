@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 06-08-2024 a las 20:28:17
--- Versión del servidor: 10.4.22-MariaDB
--- Versión de PHP: 8.1.2
+-- Servidor: localhost
+-- Tiempo de generación: 09-08-2024 a las 08:20:54
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -31,41 +31,39 @@ CREATE TABLE `asignaturas` (
   `id` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
   `cantidaddehoras` int(11) NOT NULL,
-  `etapa` varchar(15) NOT NULL,
-  `FK_carrera` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `FK_carrera` int(11) NOT NULL,
+  `etapa` enum('Activo','Inactivo') DEFAULT 'Activo'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `asignaturas`
 --
 
-INSERT INTO `asignaturas` (`id`, `nombre`, `cantidaddehoras`, `etapa`, `FK_carrera`) VALUES
-(1, 'Programacion', 3, 'Activo', 2),
-(2, 'matematicas', 2, 'Activo', 2);
+INSERT INTO `asignaturas` (`id`, `nombre`, `cantidaddehoras`, `FK_carrera`, `etapa`) VALUES
+(1, 'Programacion', 3, 1, 'Activo'),
+(2, 'Matematica', 3, 1, 'Inactivo'),
+(3, 'Lengua', 2, 2, 'Activo');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `asistencias`
+-- Estructura de tabla para la tabla `asistencia`
 --
 
-CREATE TABLE `asistencias` (
+CREATE TABLE `asistencia` (
   `id` int(11) NOT NULL,
   `profesor_id` int(11) NOT NULL,
   `fecha` date NOT NULL,
-  `estado` varchar(25) NOT NULL,
-  `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `estado` enum('Presente','Ausente','Tarde') NOT NULL,
+  `etapa` enum('Activo','Inactivo') DEFAULT 'Activo'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `asistencias`
+-- Volcado de datos para la tabla `asistencia`
 --
 
-INSERT INTO `asistencias` (`id`, `profesor_id`, `fecha`, `estado`, `etapa`) VALUES
-(3, 3, '2024-08-06', 'presente', ''),
-(4, 1, '2024-08-06', '', ''),
-(5, 2, '2024-08-06', 'ausente', ''),
-(6, 1, '2024-08-06', '', '');
+INSERT INTO `asistencia` (`id`, `profesor_id`, `fecha`, `estado`, `etapa`) VALUES
+(2, 2, '2024-08-09', 'Ausente', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -78,14 +76,15 @@ CREATE TABLE `carreras` (
   `nombre` varchar(255) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `carreras`
 --
 
 INSERT INTO `carreras` (`id`, `nombre`, `descripcion`, `etapa`) VALUES
-(2, 'Desarrollo de Software', '--', 'Activo');
+(1, 'Desarrollo de Software', 'DDS', 'Activo'),
+(2, 'Energia Renovable', '--', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -95,21 +94,23 @@ INSERT INTO `carreras` (`id`, `nombre`, `descripcion`, `etapa`) VALUES
 
 CREATE TABLE `dicta` (
   `id` int(11) NOT NULL,
-  `FKprofesor` int(11) DEFAULT NULL,
+  `usuario_id` int(11) DEFAULT NULL,
   `FKmateria` int(11) DEFAULT NULL,
-  `tipo` enum('titular','interino','suplente') DEFAULT NULL,
-  `Baja` enum('SI','NO') DEFAULT NULL,
+  `tipo` enum('titular','interino','suplente') NOT NULL,
+  `Baja` enum('SI','NO') NOT NULL,
   `Fecha_baja` date DEFAULT NULL,
   `motivo_baja` varchar(255) DEFAULT NULL,
+  `FK_carrera` int(11) DEFAULT NULL,
   `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `dicta`
 --
 
-INSERT INTO `dicta` (`id`, `FKprofesor`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `etapa`) VALUES
-(1, 1, 1, 'titular', NULL, NULL, NULL, 'activo');
+INSERT INTO `dicta` (`id`, `usuario_id`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `FK_carrera`, `etapa`) VALUES
+(1, 2, 1, 'titular', 'SI', NULL, NULL, 1, 'Activo'),
+(2, 3, 3, 'titular', 'SI', NULL, NULL, 2, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -119,21 +120,19 @@ INSERT INTO `dicta` (`id`, `FKprofesor`, `FKmateria`, `tipo`, `Baja`, `Fecha_baj
 
 CREATE TABLE `licencias` (
   `id` int(11) NOT NULL,
-  `nombre` varchar(255) NOT NULL,
   `fechadeinicio` date NOT NULL,
   `fechadefin` date NOT NULL,
-  `idprofesor` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
   `idtipos_licencias` int(11) NOT NULL,
-  `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `etapa` varchar(15) DEFAULT 'Activo'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `licencias`
 --
 
-INSERT INTO `licencias` (`id`, `nombre`, `fechadeinicio`, `fechadefin`, `idprofesor`, `idtipos_licencias`, `etapa`) VALUES
-(2, 'd', '2024-08-08', '0000-00-00', 2, 7, 'Inactivo'),
-(3, 'd', '2024-08-17', '0000-00-00', 2, 7, 'Inactivo');
+INSERT INTO `licencias` (`id`, `fechadeinicio`, `fechadefin`, `usuario_id`, `idtipos_licencias`, `etapa`) VALUES
+(1, '2024-08-10', '2024-08-24', 2, 7, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -147,60 +146,44 @@ CREATE TABLE `permisos` (
   `descripcion` varchar(255) NOT NULL,
   `fecha_creacion` datetime DEFAULT NULL,
   `fecha_modificacion` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `profesores`
+-- Estructura de tabla para la tabla `registro_clases`
 --
 
-CREATE TABLE `profesores` (
+CREATE TABLE `registro_clases` (
   `id` int(11) NOT NULL,
-  `nombreyapellido` varchar(255) NOT NULL,
-  `dni` varchar(255) NOT NULL,
-  `domicilio` varchar(255) NOT NULL,
-  `telefono` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `foto` varchar(255) NOT NULL,
-  `cv` varchar(255) NOT NULL,
-  `fechadeingreso` date NOT NULL,
-  `fechadebaja` date DEFAULT NULL,
-  `etapa` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Volcado de datos para la tabla `profesores`
---
-
-INSERT INTO `profesores` (`id`, `nombreyapellido`, `dni`, `domicilio`, `telefono`, `email`, `foto`, `cv`, `fechadeingreso`, `fechadebaja`, `etapa`) VALUES
-(1, 'maxi', '38015715', 'brasi', '4', 'maxiolmos1993@gmail.com', '', '', '2024-08-16', '0000-00-00', 'Activo'),
-(2, 'd', '2', 'd', '2', 'dem23@gmail.com', '', '', '2024-08-19', '0000-00-00', 'Activo'),
-(3, 'g', '34', 'g', '4', 'fer.olmos93@gmail.com', '', '', '2024-08-16', '2024-08-06', 'Inactivo'),
-(4, 'Hernan A', '44634317', 'calle 21 de febrero', '2645677654', 'hernanandrada277@gmail.com', '9taPAiQkRduEpjE4Ol_7xQ.jpg', 'iulNj9t_Q325IIgq6ouhog.jpg', '2024-02-21', NULL, 'Activo');
+  `usuario_id` int(11) DEFAULT NULL,
+  `carrera_id` int(11) DEFAULT NULL,
+  `materia_id` int(11) DEFAULT NULL,
+  `fecha` date NOT NULL,
+  `hora_entrada` time NOT NULL,
+  `hora_salida` time NOT NULL,
+  `etapa` enum('Activo','Inactivo') NOT NULL DEFAULT 'Activo'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `profesores_asignaturas`
+-- Estructura de tabla para la tabla `rol`
 --
 
-CREATE TABLE `profesores_asignaturas` (
-  `id_profesor` int(11) NOT NULL,
-  `id_asignatura` int(11) NOT NULL,
-  `cantidad_horas` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
+CREATE TABLE `rol` (
+  `id_rol` int(11) NOT NULL,
+  `nombre` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Estructura de tabla para la tabla `profesores_carreras`
+-- Volcado de datos para la tabla `rol`
 --
 
-CREATE TABLE `profesores_carreras` (
-  `id_profesor` int(11) NOT NULL,
-  `id_carrera` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+INSERT INTO `rol` (`id_rol`, `nombre`) VALUES
+(1, 'admin'),
+(2, 'Profesor'),
+(3, 'Preceptor');
 
 -- --------------------------------------------------------
 
@@ -213,7 +196,7 @@ CREATE TABLE `tipos_licencias` (
   `tipodelicencia` varchar(254) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `etapa` varchar(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tipos_licencias`
@@ -231,24 +214,45 @@ INSERT INTO `tipos_licencias` (`id`, `tipodelicencia`, `descripcion`, `etapa`) V
 --
 
 CREATE TABLE `usuarios` (
-  `id` int(11) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `apellido` varchar(255) NOT NULL,
+  `dni` varchar(20) NOT NULL,
+  `celular` varchar(20) DEFAULT NULL,
   `correo` varchar(255) NOT NULL,
-  `nombre` varchar(255) DEFAULT NULL,
-  `id_permisos` int(11) NOT NULL,
-  `etapa` varchar(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `password` varchar(255) DEFAULT NULL,
+  `direccion` text DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
+  `cv` varchar(255) DEFAULT NULL,
+  `fechadeingreso` date NOT NULL,
+  `fechadebaja` date DEFAULT NULL,
+  `etapa` enum('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
+  `id_rol` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `password`, `correo`, `nombre`, `id_permisos`, `etapa`) VALUES
-(1, '123', 'paablokenny20@gmail.com', 'Jaime', 2, 'Activo'),
-(2, '123', 'fjimenez@gmail.com', 'Fjimenez', 1, 'Activo'),
-(3, '123', 'a@a.cd', 'd', 3, 'Activo'),
-(4, '123', 'maxi@gmail.com', 'maxi', 3, 'Activo'),
-(5, '123', '22a@a.cd', 'maxi', 1, 'Activo');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `apellido`, `dni`, `celular`, `correo`, `password`, `direccion`, `foto`, `cv`, `fechadeingreso`, `fechadebaja`, `etapa`, `id_rol`) VALUES
+(1, 'Lucas', 'Gomez', '4423189', '2646984561', 'lucas@gmail.com', '123', '9 de julio', NULL, NULL, '2024-08-08', NULL, 'Activo', 1),
+(2, 'Demian Agustín ', 'Perez', '45973121', '2646057672', 'dem@gmail.com', NULL, 'laprida', '', '', '2024-08-08', '2024-08-09', 'Inactivo', 2),
+(3, 'Marcos', 'Gomez', '45470152', '2646058711', 'marco11s@gmail.com', '123', '9 de julio', '', '', '2024-08-10', NULL, 'Activo', 2),
+(4, 'Gabriel', 'Fernandez', '44232168', '2646754234', 'gabriel@gmail.com', '123', 'juan jofre', NULL, NULL, '2024-08-07', NULL, 'Activo', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario_asignaciones`
+--
+
+CREATE TABLE `usuario_asignaciones` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) DEFAULT NULL,
+  `tipo_asignacion` enum('carrera','asignatura') NOT NULL,
+  `referencia_id` int(11) DEFAULT NULL,
+  `cantidad_horas` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Índices para tablas volcadas
@@ -259,14 +263,14 @@ INSERT INTO `usuarios` (`id`, `password`, `correo`, `nombre`, `id_permisos`, `et
 --
 ALTER TABLE `asignaturas`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_carrera` (`FK_carrera`);
+  ADD KEY `FK_carrera` (`FK_carrera`);
 
 --
--- Indices de la tabla `asistencias`
+-- Indices de la tabla `asistencia`
 --
-ALTER TABLE `asistencias`
+ALTER TABLE `asistencia`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_profesor_id` (`profesor_id`);
+  ADD KEY `profesor_id` (`profesor_id`);
 
 --
 -- Indices de la tabla `carreras`
@@ -279,16 +283,17 @@ ALTER TABLE `carreras`
 --
 ALTER TABLE `dicta`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `FKprofesor` (`FKprofesor`),
-  ADD KEY `FKmateria` (`FKmateria`);
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `FKmateria` (`FKmateria`),
+  ADD KEY `FK_carrera` (`FK_carrera`);
 
 --
 -- Indices de la tabla `licencias`
 --
 ALTER TABLE `licencias`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `licencias_FK` (`idprofesor`),
-  ADD KEY `licencias_FK_1` (`idtipos_licencias`);
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `idtipos_licencias` (`idtipos_licencias`);
 
 --
 -- Indices de la tabla `permisos`
@@ -297,24 +302,19 @@ ALTER TABLE `permisos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `profesores`
+-- Indices de la tabla `registro_clases`
 --
-ALTER TABLE `profesores`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `registro_clases`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `carrera_id` (`carrera_id`),
+  ADD KEY `materia_id` (`materia_id`);
 
 --
--- Indices de la tabla `profesores_asignaturas`
+-- Indices de la tabla `rol`
 --
-ALTER TABLE `profesores_asignaturas`
-  ADD PRIMARY KEY (`id_profesor`,`id_asignatura`),
-  ADD KEY `profesores_asignaturas_FK_2` (`id_asignatura`);
-
---
--- Indices de la tabla `profesores_carreras`
---
-ALTER TABLE `profesores_carreras`
-  ADD PRIMARY KEY (`id_profesor`,`id_carrera`),
-  ADD KEY `profesores_carreras_FK_2` (`id_carrera`);
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`id_rol`);
 
 --
 -- Indices de la tabla `tipos_licencias`
@@ -326,8 +326,18 @@ ALTER TABLE `tipos_licencias`
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `dni` (`dni`),
+  ADD UNIQUE KEY `email` (`correo`),
+  ADD KEY `rol_id` (`id_rol`);
+
+--
+-- Indices de la tabla `usuario_asignaciones`
+--
+ALTER TABLE `usuario_asignaciones`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `usuarios_FK` (`id_permisos`);
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `referencia_id` (`referencia_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -337,13 +347,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `asistencias`
+-- AUTO_INCREMENT de la tabla `asistencia`
 --
-ALTER TABLE `asistencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE `asistencia`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `carreras`
@@ -355,13 +365,13 @@ ALTER TABLE `carreras`
 -- AUTO_INCREMENT de la tabla `dicta`
 --
 ALTER TABLE `dicta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `licencias`
 --
 ALTER TABLE `licencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
@@ -370,10 +380,16 @@ ALTER TABLE `permisos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `profesores`
+-- AUTO_INCREMENT de la tabla `registro_clases`
 --
-ALTER TABLE `profesores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `registro_clases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `rol`
+--
+ALTER TABLE `rol`
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_licencias`
@@ -385,7 +401,13 @@ ALTER TABLE `tipos_licencias`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario_asignaciones`
+--
+ALTER TABLE `usuario_asignaciones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Restricciones para tablas volcadas
@@ -395,41 +417,50 @@ ALTER TABLE `usuarios`
 -- Filtros para la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  ADD CONSTRAINT `fk_carrera` FOREIGN KEY (`FK_carrera`) REFERENCES `carreras` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `asignaturas_ibfk_1` FOREIGN KEY (`FK_carrera`) REFERENCES `carreras` (`id`);
 
 --
--- Filtros para la tabla `asistencias`
+-- Filtros para la tabla `asistencia`
 --
-ALTER TABLE `asistencias`
-  ADD CONSTRAINT `fk_profesor_id` FOREIGN KEY (`profesor_id`) REFERENCES `profesores` (`id`);
+ALTER TABLE `asistencia`
+  ADD CONSTRAINT `asistencia_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `usuarios` (`id_usuario`);
 
 --
 -- Filtros para la tabla `dicta`
 --
 ALTER TABLE `dicta`
-  ADD CONSTRAINT `dicta_ibfk_1` FOREIGN KEY (`FKprofesor`) REFERENCES `profesores` (`id`),
-  ADD CONSTRAINT `dicta_ibfk_2` FOREIGN KEY (`FKmateria`) REFERENCES `asignaturas` (`id`);
+  ADD CONSTRAINT `dicta_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `dicta_ibfk_2` FOREIGN KEY (`FKmateria`) REFERENCES `asignaturas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `dicta_ibfk_3` FOREIGN KEY (`FK_carrera`) REFERENCES `carreras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `licencias`
 --
 ALTER TABLE `licencias`
-  ADD CONSTRAINT `licencias_FK` FOREIGN KEY (`idprofesor`) REFERENCES `profesores` (`id`),
-  ADD CONSTRAINT `licencias_FK_1` FOREIGN KEY (`idtipos_licencias`) REFERENCES `tipos_licencias` (`id`);
+  ADD CONSTRAINT `licencias_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id_usuario`),
+  ADD CONSTRAINT `licencias_ibfk_2` FOREIGN KEY (`idtipos_licencias`) REFERENCES `tipos_licencias` (`id`);
 
 --
--- Filtros para la tabla `profesores_asignaturas`
+-- Filtros para la tabla `registro_clases`
 --
-ALTER TABLE `profesores_asignaturas`
-  ADD CONSTRAINT `profesores_asignaturas_FK_1` FOREIGN KEY (`id_profesor`) REFERENCES `profesores` (`id`),
-  ADD CONSTRAINT `profesores_asignaturas_FK_2` FOREIGN KEY (`id_asignatura`) REFERENCES `asignaturas` (`id`);
+ALTER TABLE `registro_clases`
+  ADD CONSTRAINT `registro_clases_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `registro_clases_ibfk_2` FOREIGN KEY (`carrera_id`) REFERENCES `carreras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `registro_clases_ibfk_3` FOREIGN KEY (`materia_id`) REFERENCES `asignaturas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `profesores_carreras`
+-- Filtros para la tabla `usuarios`
 --
-ALTER TABLE `profesores_carreras`
-  ADD CONSTRAINT `profesores_carreras_FK_1` FOREIGN KEY (`id_profesor`) REFERENCES `profesores` (`id`),
-  ADD CONSTRAINT `profesores_carreras_FK_2` FOREIGN KEY (`id_carrera`) REFERENCES `carreras` (`id`);
+ALTER TABLE `usuarios`
+  ADD CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `rol` (`id_rol`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `usuario_asignaciones`
+--
+ALTER TABLE `usuario_asignaciones`
+  ADD CONSTRAINT `usuario_asignaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `usuario_asignaciones_ibfk_2` FOREIGN KEY (`referencia_id`) REFERENCES `carreras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `usuario_asignaciones_ibfk_3` FOREIGN KEY (`referencia_id`) REFERENCES `asignaturas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

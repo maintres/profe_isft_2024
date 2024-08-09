@@ -2,30 +2,32 @@
 include '../../conn/connection.php';
 
 // Variables para almacenar los valores del formulario y mensajes de error
-$profesor_id = $materia_id = $tipo = $error = "";
-$etapa = "activo";
+$usuario_id = $materia_id = $tipo = $carrera_id = $error = "";
+$etapa = "Activo"; // Actualizado a "Activo"
 
 // Procesamiento del formulario cuando se envía
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Recolecta datos del formulario y realiza validaciones
-    $profesor_id = trim($_POST["profesor_id"]);
+    $usuario_id = trim($_POST["usuario_id"]);
     $materia_id = trim($_POST["materia_id"]);
     $tipo = trim($_POST["tipo"]);
+    $carrera_id = trim($_POST["carrera_id"]);
 
     // Validar campos obligatorios
-    if (empty($profesor_id) || empty($materia_id) || empty($tipo)) {
+    if (empty($usuario_id) || empty($materia_id) || empty($tipo) || empty($carrera_id)) {
         $error = "Por favor complete todos los campos obligatorios.";
     } else {
         try {
             // Inserta datos en la tabla dicta
-            $sql = "INSERT INTO dicta (FKprofesor, FKmateria, tipo, etapa) 
-                    VALUES (:profesor_id, :materia_id, :tipo, :etapa)";
+            $sql = "INSERT INTO dicta (usuario_id, FKmateria, tipo, etapa, FK_carrera) 
+                    VALUES (:usuario_id, :materia_id, :tipo, :etapa, :carrera_id)";
             
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':profesor_id', $profesor_id);
+            $stmt->bindParam(':usuario_id', $usuario_id);
             $stmt->bindParam(':materia_id', $materia_id);
             $stmt->bindParam(':tipo', $tipo);
             $stmt->bindParam(':etapa', $etapa);
+            $stmt->bindParam(':carrera_id', $carrera_id);
             if ($stmt->execute()) {
                 header("Location: dicta_index.php?mensaje=" . urlencode("Asignación agregada con éxito."));
                 exit();
@@ -38,37 +40,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Obtener listas de profesores y materias para select options
-$query_profesores = "SELECT id, nombreyapellido FROM profesores ORDER BY nombreyapellido";
-$result_profesores = $db->query($query_profesores);
+// Obtener listas de usuarios, carreras y materias para select options
+$query_usuarios = "SELECT id_usuario, CONCAT(nombre, ' ', apellido) AS nombreyapellido 
+                   FROM usuarios 
+                   WHERE id_rol = 2 
+                   ORDER BY nombreyapellido";
+$result_usuarios = $db->query($query_usuarios);
 
-$query_materias = "SELECT id, nombre FROM asignaturas ORDER BY nombre";
-$result_materias = $db->query($query_materias);
+$query_carreras = "SELECT id, nombre FROM carreras ORDER BY nombre";
+$result_carreras = $db->query($query_carreras);
 ?>
 
 <?php require 'navbar.php'; ?>
 
 <div class="container mt-3 w-50">
-    <div class="card rounded-2 border-0 row d-flex justify-content-center" >
+    <div class="card rounded-2 border-0 row d-flex justify-content-center">
         <h5 class="card-header bg-dark text-white">Agregar Nueva Asignación</h5>
         <div class="card-body bg-light">
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <div class="form-group">
-                    <label for="profesor_id">Profesor:</label>
-                    <select name="profesor_id" class="form-control">
+                    <label for="usuario_id">Profesor:</label>
+                    <select name="usuario_id" class="form-control">
                         <option value="">Seleccione un profesor</option>
-                        <?php while ($row = $result_profesores->fetch(PDO::FETCH_ASSOC)) : ?>
-                            <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['nombreyapellido']); ?></option>
+                        <?php while ($row = $result_usuarios->fetch(PDO::FETCH_ASSOC)) : ?>
+                            <option value="<?php echo $row['id_usuario']; ?>"><?php echo htmlspecialchars($row['nombreyapellido']); ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="carrera_id">Carrera:</label>
+                    <select id="carrera_id" name="carrera_id" class="form-control">
+                        <option value="">Seleccione una carrera</option>
+                        <?php while ($row = $result_carreras->fetch(PDO::FETCH_ASSOC)) : ?>
+                            <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['nombre']); ?></option>
                         <?php endwhile; ?>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="materia_id">Materia:</label>
-                    <select name="materia_id" class="form-control">
+                    <select id="materia_id" name="materia_id" class="form-control">
                         <option value="">Seleccione una materia</option>
-                        <?php while ($row = $result_materias->fetch(PDO::FETCH_ASSOC)) : ?>
-                            <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['nombre']); ?></option>
-                        <?php endwhile; ?>
                     </select>
                 </div>
                 <div class="form-group">
@@ -90,3 +101,32 @@ $result_materias = $db->query($query_materias);
 </div>
 
 <?php require 'footer.php'; ?>
+
+<script>
+document.getElementById('carrera_id').addEventListener('change', function() {
+    var carreraId = this.value;
+    var materiaSelect = document.getElementById('materia_id');
+
+    // Limpia las materias anteriores
+    materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+
+    if (carreraId) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'get_materias.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                var materias = JSON.parse(xhr.responseText);
+                materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>'; // Limpiar primero
+                for (var i = 0; i < materias.length; i++) {
+                    var option = document.createElement('option');
+                    option.value = materias[i].id;
+                    option.textContent = materias[i].nombre;
+                    materiaSelect.appendChild(option);
+                }
+            }
+        };
+        xhr.send('carrera_id=' + carreraId);
+    }
+});
+</script>
