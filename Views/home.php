@@ -9,36 +9,38 @@ if($_POST){
     ];
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $correo = $_POST['correo'];
-        $password = $_POST['password'];
-        $id_permisos = $_POST['id_permisos'];
-        if (!empty($correo) && !empty($password)) {
-            $sql = "SELECT * FROM usuarios WHERE correo = :correo AND password = :password";
+        $contrasena = $_POST['password']; // Cambiado para coincidir con el nuevo nombre del campo
+
+        if (!empty($correo) && !empty($contrasena)) {
+            $sql = "SELECT * FROM usuarios WHERE correo = :correo AND password = :contrasena";
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
-            $stmt->bindParam(':password', $password, PDO::PARAM_STR);
-            
+            $stmt->bindParam(':contrasena', $contrasena, PDO::PARAM_STR);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {
                 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-                $_SESSION['id'] = $usuario['id'];
+                $_SESSION['id_usuario'] = $usuario['id_usuario']; // Cambiado para coincidir con el nuevo nombre del campo
                 $_SESSION['nombre'] = $usuario['nombre'];
-                $_SESSION['id_permisos'] = $usuario['id_permisos'];   
-                $_SESSION['correo'] = $usuario['correo'];              
-                // ------------------------------------------------
-                if ($usuario['id_permisos'] == 1) {
+                $_SESSION['apellido'] = $usuario['apellido'];
+                $_SESSION['id_rol'] = $usuario['id_rol']; // Guardar el rol del usuario
+
+                // Redireccionar basado en el rol del usuario
+                if ($usuario['id_rol'] == 1) {
                     header('Location: admin/index.php');
                     exit;
-                }else if ($usuario['id_permisos'] == 2){
+                } elseif ($usuario['id_rol'] == 2) {
                     header('Location: docente/index.php');
                     exit;
-                }else if ($usuario['id_permisos'] == 3){
+                } elseif ($usuario['id_rol'] == 3) {
                     header('Location: preceptor/index.php');
                     exit;
-                }                
-            }else{
+                } else {
+                    $_SESSION['message'] = $messages[3]; // Mensaje de permisos insuficientes
+                }
+            } else {
                 $_SESSION['message'] = $messages[1];
             }
-        }else{
+        } else {
             $_SESSION['message'] = $messages[1];
         }
     }
@@ -47,13 +49,13 @@ if($_POST){
 }
 ?>
 <!DOCTYPE html>
-<html lang= "es">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <meta name="description" content="Inicio de Sesión" />   
+    <meta name="description" content="Inicio de Sesión" />
     <title>Instituto Superior de Formación Técnica Angaco</title>
     <link rel="shortcut icon" href="../img/LOGO3.ico" type="image/x-icon" />
     <style>
@@ -69,14 +71,16 @@ if($_POST){
 </head>
 <body class="container d-flex justify-content-center">
     <div class="bg-white p-4 rounded-5 text-secondary shadow my-2" style="width: 25rem">
-        <div class="d-flex justify-content-center" >
-            <img src="../img/LOGO.ico" alt="login-icon" style="height: 10rem" class=" w-100 mb-4" />
+        <div class="d-flex justify-content-center">
+            <img src="../img/LOGO.ico" alt="login-icon" style="height: 10rem" class="w-100 mb-4" />
         </div>
         <div class="text-center fs-1 fw-bold">Bienvenid@</div>
         <p>ADMINISTRADOR:</p>
-        <p>fjimenez@gmail.com</p>
+        <p>lucas@gmail.com</p>
         <p>PRECEPTOR</p>
-        <p>maxi@gmail.com</p>
+        <p>gabriel@gmail.com</p>
+        <p>Profesor</p>
+        <p>marco11s@gmail.com</p>
         <p>123</p>
         <form method="post" class="form" action="">
             <div class="input-group mt-4">
@@ -96,11 +100,11 @@ if($_POST){
             </div>
             <button type="submit" class="btn btn-primary text-white w-100 mt-4 fs-5 fw-semibold shadow-sm">Inicio</button>
             <?php
-    if (isset($_SESSION['message'])) {
-        echo '<div class="error text-danger border border-danger w-100 justify-content-center text-center d-inline-block mt-2 rounded-3 p-1"  id="myAlert" style="background-color: #f5c2c7">' . $_SESSION['message'] . '</div>';
-        unset($_SESSION['message']);
-    }
-    ?>
+            if (isset($_SESSION['message'])) {
+                echo '<div class="error text-danger border border-danger w-100 justify-content-center text-center d-inline-block mt-2 rounded-3 p-1" id="myAlert" style="background-color: #f5c2c7">' . $_SESSION['message'] . '</div>';
+                unset($_SESSION['message']);
+            }
+            ?>
         </form>
     </div>
 </body>

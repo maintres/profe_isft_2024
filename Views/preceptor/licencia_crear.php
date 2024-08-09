@@ -1,8 +1,10 @@
 <?php
 require("navbar.php");
 include("../../conn/connection.php");
+
 // -----------------------------
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+<<<<<<< HEAD
 $idtipos_licencias = $_POST['idtipos_licencias'];
 $profesorSeleccionado = $_POST['profesor'];
 $Finicio = $_POST['Finicio'];
@@ -12,22 +14,39 @@ list($profesorId, $profesorNombre) = explode('|', $profesorSeleccionado);
 if (empty($idtipos_licencias)) {
     $idtipos_licencias = NULL;
 }
-$SQL = "INSERT INTO licencias(idprofesor, nombre, fechadeinicio, fechadefin, idtipos_licencias, etapa) VALUES(?, ?, ?, ?, ?, ?)";
+$SQL = "INSERT INTO licencias(nombre, fechadeinicio, fechadefin, idprofesor, idtipos_licencias, etapa) VALUES(?, ?, ?, ?, ?, ?)";
 $Preparacion = mysqli_prepare($conexion, $SQL);
 if ($Preparacion == false) {
     die("La preparación de consulta no ha sido exitosa: " . $conexion->error);
 } else {
-    mysqli_stmt_bind_param($Preparacion, "isssi", $profesorId, $profesorNombre, $etapa, $Finicio, $Ffin, $idtipos_licencias);
+    mysqli_stmt_bind_param($Preparacion, "sssiis",  $profesorNombre, $Finicio, $Ffin, $profesorId, $idtipos_licencias, $etapa);
     if (mysqli_stmt_execute($Preparacion)) {
+=======
+    $idtipos_licencias = $_POST['idtipos_licencias'];
+    $profesorSeleccionado = $_POST['profesor'];
+    $Finicio = $_POST['Finicio'];
+    $Ffin = $_POST['Ffin'];
+    $etapa = "Activo";
+
+    list($usuarioId) = explode('|', $profesorSeleccionado);
+
+    if (empty($idtipos_licencias)) {
+        $idtipos_licencias = NULL;
+    }
+
+    try {
+        $SQL = "INSERT INTO licencias (fechadeinicio, fechadefin, usuario_id, idtipos_licencias, etapa) VALUES (?, ?, ?, ?, ?)";
+        $Preparacion = $db->prepare($SQL);
+        $Preparacion->execute([$Finicio, $Ffin, $usuarioId, $idtipos_licencias, $etapa]);
+
+>>>>>>> 4140126 (Modifique varias cosas, por que cambie la bd para poder acceder ah la vista profesor y asi hacer las tareas que me dijo el profe, hagan una revison de sus modulos.)
         echo '<script>
               var msj = "Licencia ingresada con éxito.";
-              window.location="licencia_index.php?mensaje=" + msj;
+              window.location="licencia_index.php?mensaje=" + encodeURIComponent(msj);
               </script>';
-    } else {
-        die("Se ha producido un error al guardar los datos: " . $Preparacion->error);
+    } catch (PDOException $e) {
+        die("Se ha producido un error al guardar los datos: " . $e->getMessage());
     }
-    mysqli_stmt_close($Preparacion);
-}
 }
 ?>
 <!-- -------------------------------- -->
@@ -36,47 +55,55 @@ if ($Preparacion == false) {
     <h5 class="card-header bg-dark text-white">Formulario de crear licencia</h5>
     <div class="card-body bg-light">
       <form class="form-group" method="post" action="">
-      <div class="form-group">
-        <label for="profesor">Profesor:</label>
-        <?php
-        $consulta = "SELECT id, nombreyapellido FROM profesores";
-        $resultado = mysqli_query($conexion, $consulta);
-        ?>
-        <select class="form-select" name="profesor" id="">
+        <div class="form-group">
+          <label for="profesor">Profesor:</label>
           <?php
-          while ($opciones = mysqli_fetch_assoc($resultado)) {
+          // Consulta para obtener profesores con id_rol = 2
+          $consulta = "SELECT id_usuario AS id, CONCAT(nombre, ' ', apellido) AS nombre_completo FROM usuarios WHERE id_rol = 2";
+          $resultado = $db->query($consulta);
+          if (!$resultado) {
+              die("Error en la consulta: " . $db->errorInfo()[2]);
+          }
           ?>
-            <option value="<?php echo $opciones['id'] . '|' . $opciones['nombreyapellido']; ?>">
-              <?php echo $opciones['nombreyapellido']; ?>
-            </option>
-          <?php
-          }          
-          ?>
-        </select>
-      </div>
+          <select class="form-select" name="profesor" id="profesor">
+            <?php
+            while ($opciones = $resultado->fetch(PDO::FETCH_ASSOC)) {
+            ?>
+              <option value="<?php echo htmlspecialchars($opciones['id']); ?>">
+                <?php echo htmlspecialchars($opciones['nombre_completo']); ?>
+              </option>
+            <?php
+            }          
+            ?>
+          </select>
+        </div>
         <!-- -------------------------------------- -->
         <div class="form-group">
           <label for="Finicio">Fecha de inicio:</label>        
-          <input class="form-control datepicker-date" type="date" name="Finicio" id="">
+          <input class="form-control" type="date" name="Finicio" id="Finicio" required>
         </div>
         <!-- -------------------------------------- -->
         <div class="form-group">
-          <label for="Finicio">Fecha de fin:</label>          
-          <input class="form-control datepicker-date" type="date" name="Ffin" id="">
+          <label for="Ffin">Fecha de fin:</label>          
+          <input class="form-control" type="date" name="Ffin" id="Ffin" required>
         </div>
         <!-- -------------------------- -->
         <div class="form-group">
-          <label for="Finicio">Tipo de Licencia:</label>
+          <label for="idtipos_licencias">Tipo de Licencia:</label>
           <?php
-          $cons = "SELECT * FROM tipos_licencias WHERE etapa = 'Activo'";
-          $resul = mysqli_query($conexion, $cons);
+          // Consulta para obtener tipos de licencia activos
+          $cons = "SELECT id, tipodelicencia FROM tipos_licencias WHERE etapa = 'Activo'";
+          $resul = $db->query($cons);
+          if (!$resul) {
+              die("Error en la consulta: " . $db->errorInfo()[2]);
+          }
           ?>
-          <select class="form-select" name="idtipos_licencias" id="">
+          <select class="form-select" name="idtipos_licencias" id="idtipos_licencias">
             <?php
-            while ($opcion = mysqli_fetch_assoc($resul)) {
+            while ($opcion = $resul->fetch(PDO::FETCH_ASSOC)) {
             ?>
-              <option value="<?php echo $opcion['id'] . '|' . $opcion['tipodelicencia']; ?>">
-                <?php echo $opcion['tipodelicencia']; ?>
+              <option value="<?php echo htmlspecialchars($opcion['id']); ?>">
+                <?php echo htmlspecialchars($opcion['tipodelicencia']); ?>
               </option>
             <?php
             }
@@ -84,7 +111,7 @@ if ($Preparacion == false) {
           </select>
         </div>
         <!-- ------------------------ -->
-         <br>
+        <br>
         <input class="btn btn-primary" type="submit" value="Guardar" />
       </form>
     </div>

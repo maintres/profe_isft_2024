@@ -1,15 +1,26 @@
 <?php
 require '../../conn/connection.php'; 
 require 'navbar.php';
+
 // ---------------------------------
 if (isset($_GET['txtID'])) {
     $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : "";
-    $sentencia = $db->prepare("UPDATE asignaturas SET etapa = 'Inactivo' WHERE id = :id");
-    $sentencia->bindParam(':id', $txtID);
-    $sentencia->execute();
-    $mensaje = "Registro Materia Eliminado";
-    header("Location:materia_index.php?mensaje=" . urlencode($mensaje));
-    exit;
+
+    try {
+        // Cambia el estado de activo a inactivo en lugar de eliminar el registro
+        $sentencia = $db->prepare("UPDATE asignaturas SET etapa = 'Inactivo' WHERE id = :id");
+        $sentencia->bindParam(':id', $txtID, PDO::PARAM_INT);
+        $sentencia->execute();
+
+        $mensaje = "Registro Materia Inactivado";
+        echo '<script>
+            var msj = "' . $mensaje . '";
+            window.location="materia_index.php?mensaje="+ encodeURIComponent(msj);
+            </script>';
+        exit;
+    } catch (PDOException $e) {
+        error_log("Error al actualizar el estado de la materia: " . $e->getMessage());
+    }
 }
 ?>
 <!-- ------------------------------------------- -->
@@ -49,11 +60,11 @@ if (isset($_GET['txtID'])) {
                                         <div class="btn-group">
                                             <a href="materia_edit.php?id=<?php echo htmlspecialchars($materia['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm" role="button"><i class="fas fa-edit"></i></a>
                                             <?php if ($materia['etapa'] == 'Inactivo') { ?>
-                                                <button class="btn btn-danger btn-sm" disabled title="Borrar" role="button"><i class="fas fa-trash"></i></button>
+                                                <button class="btn btn-danger btn-sm" disabled title="Inactivado" role="button"><i class="fas fa-trash"></i></button>
                                             <?php } else { ?>
-                                                <a href="javascript:eliminar3(<?php echo $materia['id']; ?>)" 
+                                                <a href="javascript:eliminar3(<?php echo htmlspecialchars($materia['id'], ENT_QUOTES, 'UTF-8'); ?>)" 
                                                     class="btn btn-danger btn-sm" 
-                                                    title="Borrar" 
+                                                    title="Inactivar" 
                                                     role="button">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
@@ -78,7 +89,7 @@ if (isset($_GET['txtID'])) {
 <script src="js/ocultarMensaje.js"></script>
 <script>
 function eliminar3(id) {
-    if (confirm("¿Estás seguro de que deseas eliminar esta materia?")) {
+    if (confirm("¿Estás seguro de que deseas inactivar esta materia?")) {
         window.location.href = "materia_index.php?txtID=" + id;
     }
 }

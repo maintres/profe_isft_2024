@@ -25,13 +25,15 @@ class PDF extends FPDF
     // Tabla simple
     function BasicTable($header, $data)
     {
+        $this->SetFont('Arial', 'B', 12);
         foreach ($header as $col) {
-            $this->Cell(40, 7, $col, 1);
+            $this->Cell(40, 10, $col, 1);
         }
         $this->Ln();
+        $this->SetFont('Arial', '', 12);
         foreach ($data as $row) {
             foreach ($row as $col) {
-                $this->Cell(40, 6, $col, 1);
+                $this->Cell(40, 10, $col, 1);
             }
             $this->Ln();
         }
@@ -39,9 +41,9 @@ class PDF extends FPDF
 }
 
 try {
-    $sql = "SELECT a.id, p.nombreyapellido AS nombre_profesor, a.fecha, a.estado 
-            FROM asistencias a
-            INNER JOIN profesores p ON a.profesor_id = p.id
+    $sql = "SELECT a.id, CONCAT(u.nombre, ' ', u.apellido) AS nombre_profesor, a.fecha, a.estado 
+            FROM asistencia a
+            INNER JOIN usuarios u ON a.profesor_id = u.id_usuario
             ORDER BY a.fecha DESC";
     $stmt = $db->query($sql);
     if ($stmt === false) {
