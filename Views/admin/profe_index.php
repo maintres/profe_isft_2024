@@ -1,15 +1,18 @@
 <?php
 require '../../conn/connection.php'; 
 require 'navbar.php';
-//-------------BORRADO------------------ 
-if(isset($_GET['txtID'])){
-    $txtID=(isset($_GET['txtID']))?$_GET['txtID']:"";
-    $sentencia=$db->prepare("UPDATE profesores SET etapa = 'Inactivo' WHERE id = :id" );
-    $sentencia->bindParam(':id',$txtID);
+//-------------DAR DE BAJA------------------ 
+if (isset($_GET['txtID'])) {
+    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : "";
+    $sentencia = $db->prepare("UPDATE profesores SET etapa = 'Inactivo' WHERE id = :id");
+    $sentencia->bindParam(':id', $txtID);
     $sentencia->execute();
-    $mensaje="Registro Profesor Eliminado";
-    header("Location:profe_index.php?mensaje=".$mensaje);
-  }
+    echo '<script>
+                    var msj = "El profesor ha sido dado de baja exitosamente";
+                    window.location="profe_index.php?mensaje="+ msj
+                  </script>';
+            exit;
+}
 ?>
 <!-- ------------------------------------------- -->
 <section class="content mt-3">
@@ -34,13 +37,14 @@ if(isset($_GET['txtID'])){
                                 <th>Foto</th>
                                 <th>Fecha de Ingreso</th>
                                 <th>Fecha de Baja</th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             try {
-                                $query = "SELECT * FROM profesores WHERE etapa = 'Activo'";
+                                $query = "SELECT * FROM profesores";
                                 $stmt = $db->prepare($query);
                                 $stmt->execute();
                                 $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -62,20 +66,22 @@ if(isset($_GET['txtID'])){
                                 </td>
                                 <td><?php echo htmlspecialchars($profesor['fechadeingreso'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars($profesor['fechadebaja'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($profesor['etapa'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td class="text-center">
                                     <div class="btn-group">
                                         <a href="profe_edit.php?id=<?php echo htmlspecialchars($profesor['id'], ENT_QUOTES, 'UTF-8'); ?>" 
                                         class="btn btn-warning btn-sm" role="button">
                                         <i class="fas fa-edit"></i></a>
 
-                                        <a href="javascript:eliminar2(<?php echo $profesor['id']; ?>)" 
+                                        <a href="javascript:darDeBaja(<?php echo $profesor['id']; ?>)" 
                                                  class="btn btn-danger btn-sm" 
-                                                 title="Borrar" 
+                                                 title="Dar de baja" 
                                                  role="button">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                     </div>
                                 </td>
+                               
                             </tr>
                 <?php
                     }
@@ -93,4 +99,11 @@ if(isset($_GET['txtID'])){
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="js/ocultarMensaje.js"></script>
+<script>
+    function darDeBaja(id) {
+        if (confirm('¿Estás seguro de que deseas dar de baja a este profesor?')) {
+            window.location.href = 'profe_index.php?txtID=' + id;
+        }
+    }
+</script>
 <?php require 'footer.php'; ?>

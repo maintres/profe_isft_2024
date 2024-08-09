@@ -109,10 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label for="nombre">Fecha de ingreso:</label>
                             <input type="date" class="form-control" id="fechadeingreso" name="fechadeingreso"  required>
                         </div>                    
-                        <div class="form-group">
-                            <label for="nombre">Fecha de Baja:</label>
-                            <input type="date" class="form-control" id="fechadebaja" name="fechadebaja"  >
-                        </div>
+                       
                 <!-- --------------------------------- -->
                 <button type="submit" class="btn btn-primary ">Guardar</button>
                 <div id="confirmacion" style="display: none;">

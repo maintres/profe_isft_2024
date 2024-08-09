@@ -3,7 +3,7 @@
 $db_host = 'localhost'; // Host de la base de datos
 $db_name = 'abm_escuela'; // Nombre de la base de datos
 $db_user = 'root'; // Usuario de la base de datos
-$db_password = '44061051'; // Contraseña de la base de datos
+$db_password = ''; // Contraseña de la base de datos
 
 try {
     $db = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_password);

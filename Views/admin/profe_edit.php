@@ -14,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Manejo del archivo de foto
     $foto = $_FILES['foto']['name'];
     $cv = $_FILES['cv']['name'];
+    $etapa = $fechadebaja ? 'Inactivo' : 'Activo';
     $updateQuery = "UPDATE profesores SET 
         nombreyapellido = :nombreyapellido, 
         dni = :dni, 
@@ -21,7 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         telefono = :telefono, 
         email = :email, 
         fechadeingreso = :fechadeingreso, 
-        fechadebaja = :fechadebaja";
+        fechadebaja = :fechadebaja, 
+        etapa = :etapa";
     if ($foto) {
         $updateQuery .= ", foto = :foto";
         $target_dir_foto = "../../profesores/uploads/";
@@ -45,6 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':fechadeingreso', $fechadeingreso);
         $stmt->bindParam(':fechadebaja', $fechadebaja);
+        $stmt->bindParam(':etapa', $etapa);
         if ($foto) {
             $stmt->bindParam(':foto', $foto);
         }
@@ -52,12 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':cv', $cv);
         }
         if ($stmt->execute()) {
-            //$mensaje = "Profesor actualizado exitosamente";
             echo '<script>
                     var msj = "Profesor actualizado exitosamente";
                     window.location="profe_index.php?mensaje="+ msj
                   </script>';
-           // header("Location: profe_index.php?mensaje=" . urlencode($mensaje));
             exit;
         } else {
             echo "Error: No se pudo actualizar el profesor.";
@@ -158,4 +159,4 @@ if ($id) {
 <script src="../../js/contraseña.js"></script>
 <script src="../../js/validacion.js"></script>
 <script src="../../js/validacion2.js"></script>
-<?php require 'footer.php'; ?>
+<?php require 'footer.php'; ?>                                                                                                                                                                                                 
