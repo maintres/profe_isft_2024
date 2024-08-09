@@ -12,12 +12,12 @@ list($profesorId, $profesorNombre) = explode('|', $profesorSeleccionado);
 if (empty($idtipos_licencias)) {
     $idtipos_licencias = NULL;
 }
-$SQL = "INSERT INTO licencias(idprofesor, nombre, fechadeinicio, fechadefin, idtipos_licencias, etapa) VALUES(?, ?, ?, ?, ?, ?)";
+$SQL = "INSERT INTO licencias(nombre, fechadeinicio, fechadefin, idprofesor, idtipos_licencias, etapa) VALUES(?, ?, ?, ?, ?, ?)";
 $Preparacion = mysqli_prepare($conexion, $SQL);
 if ($Preparacion == false) {
     die("La preparación de consulta no ha sido exitosa: " . $conexion->error);
 } else {
-    mysqli_stmt_bind_param($Preparacion, "isssi", $profesorId, $profesorNombre, $etapa, $Finicio, $Ffin, $idtipos_licencias);
+    mysqli_stmt_bind_param($Preparacion, "sssiis",  $profesorNombre, $Finicio, $Ffin, $profesorId, $idtipos_licencias, $etapa);
     if (mysqli_stmt_execute($Preparacion)) {
         echo '<script>
               var msj = "Licencia ingresada con éxito.";

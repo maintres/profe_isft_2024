@@ -5,23 +5,25 @@ require("navbar.php");
 if (isset($_POST['Enviar'])) {
     $idtipos_licencias = $_POST['idtipos_licencias'];
     $id = $_POST['id'];
-    $profesor = $_POST['profesor'];
+    $profesorSeleccionado = $_POST['profesor'];
     $FechaInicio = $_POST['Finicio'];
     $FechaFin = $_POST['Ffin'];
+    $etapa = "Activo";
 
+    list($profesorId, $profesorNombre) = explode('|', $profesorSeleccionado);
     # Asignar NULL si idtipos_licencias está vacío
     if (empty($idtipos_licencias)) {
         $idtipos_licencias = NULL;
     }
 
-    $SQL = "UPDATE licencias SET nombre=?, fechadeinicio=?, fechadefin=?, idtipos_licencias=? WHERE id=?";
+    $SQL = "UPDATE licencias SET nombre=?, fechadeinicio=?, fechadefin=?, idprofesor=?, idtipos_licencias=?, etapa=? WHERE id=?";
     $sentenciaPreparada = mysqli_prepare($conexion, $SQL);
 
     # Cambiar el tipo de enlace para que soporte NULL
     if ($idtipos_licencias === NULL) {
-        mysqli_stmt_bind_param($sentenciaPreparada, "sssii", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id);
+        mysqli_stmt_bind_param($sentenciaPreparada, "sssiiis", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id, $profesorId, $etapa);
     } else {
-        mysqli_stmt_bind_param($sentenciaPreparada, "sssii", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id);
+        mysqli_stmt_bind_param($sentenciaPreparada, "sssiiis", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id, $profesorId, $etapa);
     }
 
     if (mysqli_stmt_execute($sentenciaPreparada)) {
@@ -74,13 +76,37 @@ if (isset($_POST['Enviar'])) {
                         </option>
                     <?php
                     }
-                    mysqli_close($conexion);
+                   
                     ?>
                 </select>
-                <p class="form-label mt-4">Fecha de inicio</p>
-                <input class="form-control datepicker-date" type="date" name="Finicio" value="<?php echo $FechaInicio; ?>">
-                <p>Fecha de fin</p>
-                <input class="form-control datepicker-date" type="date" name="Ffin" value="<?php echo $FechaFin; ?>"><br>
+                <!-- -------------------------------------- -->
+                <div class="form-group">
+                   <label for="Finicio">Fecha de inicio:</label>
+                   <input class="form-control datepicker-date" type="date" name="Finicio" value="<?php echo $FechaInicio; ?>">
+                </div>
+                <!-- -------------------------------------- -->
+                <div class="form-group">
+                    <label for="Finicio">Fecha de fin:</label>
+                    <input class="form-control datepicker-date" type="date" name="Ffin" value="<?php echo $FechaFin; ?>">
+                </div>
+                <!-- -------------------------------------- -->
+                <p class="form-label mt-4">Tipo de licencia</p>
+                <?php
+                 $cons = "SELECT * FROM tipos_licencias WHERE etapa = 'Activo'";
+                 $resul = mysqli_query($conexion, $cons);
+                  ?>
+                <select class="form-select" name="tipoLicencia" id="">
+                <?php
+                 while ($opcion = mysqli_fetch_assoc($resul)) {
+                 ?>
+                    <option value="<?php echo $opcion['id'] . '|' . $opcion['tipodelicencia'];?>">
+                    <?php echo $opcion['tipodelicencia']; ?>
+                    </option>
+                    <?php
+                 }
+                 mysqli_close($conexion);
+                    ?>
+                </select>
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
                 <input type="hidden" id="idtipos_licencias" name="idtipos_licencias" value="">
                 <input class="btn btn-primary" type="submit" name="Enviar" value="Guardar Cambios">
