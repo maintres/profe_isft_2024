@@ -1,43 +1,149 @@
 <?php
-require 'navbar.php'; 
+require 'navbar.php';
 include('../../conn/connection.php');
-// -----------------------------------------
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-if(isset($_POST['buscar1'])){
-    $sql_clase = "SELECT * FROM registro_clases WHERE ...";
-    $result_clase = $conexion->query($sql_clase);
-    $clase = $result_clase->fetch_assoc();
+session_start();
+// Habilitar visualización de errores
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    $select_clase = $clase['id'];  
-
-    echo "
-    *poner un if para no permitir que se pueda ingresar la misma fecha dos veces en la mima tabla*    
-    "; 
-
-    $fecha = $_POST['fecha'];
-    $hora = $_POST['hora'];
-    
-    $usuario_id= $_POST['usuario_id'];
-    $carrera_id= $_POST['carrera_id'];
-    $usuario_id= $_POST['usuario_id'];    
-    
-}
-if(isset($_POST['buscar2'])){
-    
-    echo "
-    *poner un if para no permitir que se pueda ingresar la misma fecha dos veces en la mima tabla*
-    ";
-
-}
+function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id)
+{
+    $sql_insert = "INSERT INTO registro_clases (usuario_id, carrera_id, materia_id, fecha, hora_entrada) VALUES (?, ?, ?, ?, ?)";
+    $stmt_insert = $conexion->prepare($sql_insert);
+    $fecha = date("Y-m-d");
+    $hora_entrada = date("H:i:s");
+    $stmt_insert->bind_param('iiiss', $usuario_id, $carrera_id, $materia_id, $fecha, $hora_entrada);
+    return $stmt_insert->execute();
 }
 
-// ----------------------------------------------------------------------
-// Verificar que el usuario está logueado y es un docente
+function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id) {
+    $fecha = date("Y-m-d");
+    $hora_salida = date("H:i:s");
+
+    // Consulta SQL para actualizar la hora de salida
+    $sql_update = "UPDATE registro_clases SET hora_salida = ? WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
+    $stmt_update = $conexion->prepare($sql_update);
+
+    if ($stmt_update === false) {
+        die('Error en prepare: ' . $conexion->error);
+    }
+
+    // Ajuste de los parámetros para bind_param:
+    // 's' para hora_salida (cadena de texto)
+    // 'i' para usuario_id, carrera_id, y materia_id (enteros)
+    // 's' para fecha (cadena de texto)
+    $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha);
+
+    if (!$stmt_update->execute()) {
+        echo "Error al ejecutar la consulta: " . $stmt_update->error;
+    }
+    return $stmt_update->execute();
+}
+
+function obtenerRegistro($conexion, $usuario_id, $carrera_id, $materia_id)
+{
+    $sql_check = "SELECT * FROM registro_clases WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ?";
+    $stmt_check = $conexion->prepare($sql_check);
+    $fecha = date("Y-m-d");
+    $stmt_check->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha);
+    $stmt_check->execute();
+    return $stmt_check->get_result()->fetch_assoc();
+}
+
+function determinarEstado($registro) {
+    if ($registro) {
+        if (!empty($registro['hora_entrada']) && !empty($registro['hora_salida'])) {
+            return 'Presente';
+        } else {
+            return 'Ausente';
+        }
+    }
+    return 'Pendiente';
+}
+
+function procesarFormulario($conexion)
+{
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $usuario_id = $_POST['usuario_id'];
+        $carrera_id = $_POST['carrera_id'];
+        $materia_id = $_POST['materia_id'];
+
+        $registro = obtenerRegistro($conexion, $usuario_id, $carrera_id, $materia_id);
+
+        if (isset($_POST['buscar1'])) {
+            if (!$registro) {
+                if (registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id)) {
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Hora de entrada registrada',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    </script>";
+                } else {
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al registrar la entrada',
+                            text: 'Por favor, inténtalo de nuevo.',
+                            showConfirmButton: true
+                        });
+                    </script>";
+                }
+            } else {
+                echo "<script>
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Registro existente',
+                        text: 'Ya existe un registro para esta fecha.',
+                        showConfirmButton: true
+                    });
+                </script>";
+            }
+        } elseif (isset($_POST['buscar2'])) {
+            if ($registro && empty($registro['hora_salida'])) {
+                if (registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id)) {
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Hora de salida registrada',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    </script>";
+                } else {
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al registrar la salida',
+                            text: 'Por favor, inténtalo de nuevo.',
+                            showConfirmButton: true
+                        });
+                    </script>";
+                }
+            } else {
+                echo "<script>
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Registro inválido',
+                        text: 'No hay registro de entrada o ya se registró la salida.',
+                        showConfirmButton: true
+                    });
+                </script>";
+            }
+        }
+    }
+}
+
+procesarFormulario($conexion);
+
 if (!isset($_SESSION['id_usuario']) || $_SESSION['id_rol'] != 2) {
     die("No tienes permisos para acceder a esta página.");
 }
 $usuario_id = $_SESSION['id_usuario'];
-// Función para obtener materias y carreras del docente
+
 function getMateriasAndCarreras($db, $usuario_id)
 {
     $queryMaterias = "
@@ -53,11 +159,11 @@ function getMateriasAndCarreras($db, $usuario_id)
     $stmtMaterias->execute();
     return $stmtMaterias->fetchAll(PDO::FETCH_ASSOC);
 }
-// Función para obtener registros
+
 function getRegistros($db, $usuario_id)
 {
     $queryRegistros = "
-        SELECT DISTINCT carrera_id, materia_id
+        SELECT carrera_id, materia_id, fecha, hora_entrada, hora_salida
         FROM registro_clases
         WHERE usuario_id = :usuario_id
     ";
@@ -66,16 +172,16 @@ function getRegistros($db, $usuario_id)
     $stmtRegistros->execute();
     return $stmtRegistros->fetchAll(PDO::FETCH_ASSOC);
 }
-// Obtener datos
+
 $materias = getMateriasAndCarreras($db, $usuario_id);
 $registros = getRegistros($db, $usuario_id);
-// Convertir registros en un array de fácil acceso
+
 $registrosMap = [];
 foreach ($registros as $registro) {
-    $registrosMap[$registro['carrera_id'] . '-' . $registro['materia_id']] = true;
+    $key = $registro['carrera_id'] . '-' . $registro['materia_id'];
+    $registrosMap[$key] = $registro;
 }
 ?>
-<!-- Código HTML para mostrar las materias y carreras -->
 <section class="content mt-3">
     <div class="row m-auto">
         <div class="col-sm">
@@ -84,7 +190,6 @@ foreach ($registros as $registro) {
                     <h5 class="d-inline-block">Listado de Registros de Clases</h5>
                     <a class="btn btn-warning float-right mb-2 mr-3" href="">Listar Asistencias</a> 
                     <p class="float-right">**posible boton para listar la tabla "registro_clases"**</p>                
-
                 </div>
                 <div class="card-body table-responsive">
                     <table id="example" class="table table-striped table-sm" style="width:100%">
@@ -93,8 +198,11 @@ foreach ($registros as $registro) {
                                 <th>#</th>
                                 <th>Carrera</th>
                                 <th>Materia</th>
-                                <th>Estado del Registro</th> 
-                                <th>Agrega</th>
+                                <th>Estado del Registro</th>
+                                <th>Hora Entrada</th>
+                                <th>Hora Salida</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,88 +210,75 @@ foreach ($registros as $registro) {
                             $i = 1;
                             foreach ($materias as $materia) {
                                 $key = $materia['carrera_id'] . '-' . $materia['materia_id'];
-                                $registrado = isset($registrosMap[$key]);
+                                $registro = isset($registrosMap[$key]) ? $registrosMap[$key] : null;
+                                $estado = $registro ? ($registro['hora_salida'] ? 'Presente' : 'Ausente') : 'No Registrado';
+                                $hora_entrada = $registro ? $registro['hora_entrada'] : 'No Registrado';
+                                $hora_salida = $registro ? $registro['hora_salida'] : 'No Registrado';
+                                $fecha_salida = $registro ? $registro['fecha'] : 'No Registrado';
                             ?>
                             <tr>
                                 <td><?php echo $i++; ?></td>
                                 <td><?php echo htmlspecialchars($materia['carrera_nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars($materia['materia_nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td>
-                                    <?php echo $registrado ? 'Registrado' : 'Pendiente'; ?>
-                                    <p>**no se si dejarlo o quitarlo**</p>
-                                </td>
-                                <!-- ---------------------------- -->
+                                <td><?php echo $estado; ?></td>
+                                <td><?php echo htmlspecialchars($hora_entrada, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($hora_salida, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($fecha_salida, ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td class="text-center">
-                                    <!-- <div class="btn-group">
-                                        <?php if (!$registrado) { ?>
-                                            <a href="listar_registros.php?usuario_id=<?php echo $usuario_id; ?>&carrera_id=<?php echo $materia['carrera_id']; ?>&materia_id=<?php echo $materia['materia_id']; ?>" 
-                                                class="btn btn-primary btn-sm" 
-                                                role="button">Registrar Clase
-                                            </a>
-                                        <?php } else { ?>
-                                            <button class="btn btn-success btn-sm" disabled role="button">Registrado</button>
-                                        <?php } ?>
-                                    </div> -->
-                                    <!-- ------------------------- -->
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mi-modal">
-                                    Asistencia
-                                    </button> 
-                                </td>                               
-                                <!-- ------------------------------------------------- -->
-                                <div class="modal fade" id="mi-modal" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLabel">Registrar </h5>
-                                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                                </button>
+                                    <?php if (!$registro || !$registro['hora_salida']) { ?>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mi-modal-<?php echo $materia['materia_id']; ?>">
+                                            Asistencia
+                                        </button>
+                                    <?php } else { ?>
+                                        <button class="btn btn-success" disabled role="button">Registrado</button>
+                                    <?php } ?>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="mi-modal-<?php echo $materia['materia_id']; ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Registrar Asistencia</h5>
+                                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="" method="post">
+                                                        <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($usuario_id); ?>">
+                                                        <input type="hidden" name="carrera_id" value="<?php echo htmlspecialchars($materia['carrera_id']); ?>">
+                                                        <input type="hidden" name="materia_id" value="<?php echo htmlspecialchars($materia['materia_id']); ?>">
+                                                        <input type="hidden" name="fecha" value="<?php echo date("Y-m-d"); ?>">
+                                                        <input type="hidden" name="hora" value="<?php echo date("H:i:s"); ?>">
+                                                        <div class="form-group d-flex">
+                                                            <b>Docente:</b>
+                                                            <p><?php echo ": " . $_SESSION['nombre']; ?></p>
+                                                        </div>
+                                                        <div class="form-group d-flex">
+                                                            <b>Materia:</b>
+                                                            <p><?php echo ": " . htmlspecialchars($materia['materia_nombre']); ?></p>
+                                                        </div>
+                                                        <div class="form-group d-flex">
+                                                            <b>Carrera:</b>
+                                                            <p><?php echo ": " . htmlspecialchars($materia['carrera_nombre']); ?></p>
+                                                        </div>
+                                                        <div class="form-group d-flex">
+                                                            <b>Fecha:</b>
+                                                            <p><?php echo ": " . date("d-m-Y"); ?></p>
+                                                        </div>
+                                                        <div class="form-group d-flex">
+                                                            <b>Hora:</b>
+                                                            <p><?php echo ": " . date("H:i:s"); ?></p>
+                                                        </div>
+                                                        <div class="btn-group d-flex pt-2">
+                                                            <button type="submit" name="buscar1" class="btn btn-primary w-100">Entrada</button>
+                                                            <button type="submit" name="buscar2" class="btn btn-danger w-100">Salida</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
-                                            <div class="modal-body">
-                                                <form action="" method="post">
-                                                    <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($usuario_id); ?>">
-                                                    <input type="hidden" name="carrera_id" value="<?php echo htmlspecialchars($materia['carrera_id']); ?>">
-                                                    <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($materia['materia_id']); ?>">
-                                                    <input type="hidden" name="fecha" value="<?php echo date("Y-m-d");?>">
-                                                    <input type="hidden" name="hora" value="<?php echo date("h:i:sa");?>">
-                                                    <!-- ---------------------------------------- -->
-                                                    <div class="form-group d-flex">
-                                                        <b>Docente</b>
-                                                        <p><?php echo ": ". $_SESSION['nombre']?></p>
-                                                        <!-- <label for="recipient-name" class="col-form-label">Docente:</label>
-                                                        <input type="text" class="form-control" name="nombre" value="<?php echo $_SESSION['nombre']?>" selected disabled > -->
-                                                    </div> 
-                                                    <div class="form-group d-flex">
-                                                        <b>Materia</b>
-                                                        <p><?php echo ": ". $materia['materia_nombre']?></p>                                                        
-                                                    </div> 
-                                                    <div class="form-group d-flex">
-                                                        <b>Carrera</b>
-                                                        <p><?php echo ": ". $materia['carrera_nombre']?></p>                                                        
-                                                    </div>    
-                                                  
-                                                    <div class="form-group d-flex">
-                                                        <b>Fecha</b>
-                                                        <p><?php echo ": ".date("d-m-Y");?></p>                                                        
-                                                    </div>
-                                                    <div class="form-group d-flex">
-                                                        <b>Hora</b>
-                                                        <p><?php echo ": ".date("h:i:sa");?></p>                                                        
-                                                    </div>                                                    
-                                                    <!-- ----------------- -->
-                                                    <p>**hay que hacer funcionar la carga del form y los botones redireccionan hacia el post**</p>                                                    
-                                                    <p>**no se si la carga de fecha y hora se pueda registrar asi, si no hay que cambiarlo en la BD y poner que sea tipo text**</p>   
-                                                    <p>**mas comentarios en la linea 13 y 20**</p>    
-                                                    <div class="btn-grup d-flex pt-2">                                                        
-                                                        <button type="submit" name="buscar1" class="btn btn-primary w-100">Entrada</button>
-                                                        <button type="submit" name="buscar2" class="btn btn-danger w-100">Salida</button>
-                                                    </div>
-                                                </form>
-                                            </div>                                            
                                         </div>
                                     </div>
-                                </div>
-                                <!-- ------------------------------------------- -->
+                                </td>
                             </tr>
                             <?php } ?>
                         </tbody>

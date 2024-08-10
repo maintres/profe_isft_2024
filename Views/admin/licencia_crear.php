@@ -4,24 +4,6 @@ include("../../conn/connection.php");
 
 // -----------------------------
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-<<<<<<< HEAD
-$idtipos_licencias = $_POST['idtipos_licencias'];
-$profesorSeleccionado = $_POST['profesor'];
-$Finicio = $_POST['Finicio'];
-$Ffin = $_POST['Ffin'];
-$etapa = "Activo";
-list($profesorId, $profesorNombre) = explode('|', $profesorSeleccionado);
-if (empty($idtipos_licencias)) {
-    $idtipos_licencias = NULL;
-}
-$SQL = "INSERT INTO licencias(nombre, fechadeinicio, fechadefin, idprofesor, idtipos_licencias, etapa) VALUES(?, ?, ?, ?, ?, ?)";
-$Preparacion = mysqli_prepare($conexion, $SQL);
-if ($Preparacion == false) {
-    die("La preparación de consulta no ha sido exitosa: " . $conexion->error);
-} else {
-    mysqli_stmt_bind_param($Preparacion, "sssiis", $profesorNombre, $Finicio, $Ffin,$profesorId, $idtipos_licencias,$etapa);
-    if (mysqli_stmt_execute($Preparacion)) {
-=======
     $idtipos_licencias = $_POST['idtipos_licencias'];
     $profesorSeleccionado = $_POST['profesor'];
     $Finicio = $_POST['Finicio'];
@@ -39,7 +21,6 @@ if ($Preparacion == false) {
         $Preparacion = $db->prepare($SQL);
         $Preparacion->execute([$Finicio, $Ffin, $usuarioId, $idtipos_licencias, $etapa]);
 
->>>>>>> 4140126 (Modifique varias cosas, por que cambie la bd para poder acceder ah la vista profesor y asi hacer las tareas que me dijo el profe, hagan una revison de sus modulos.)
         echo '<script>
               var msj = "Licencia ingresada con éxito.";
               window.location="licencia_index.php?mensaje=" + encodeURIComponent(msj);
