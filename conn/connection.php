@@ -18,6 +18,6 @@ if ($conexion->connect_error) {
     error_log("Error de conexión: " . $conexion->connect_error); // Registro del error
     exit(); // Finaliza el script sin generar salida
 }
+// -------Consideraciones de Zona Horaria----------
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 ?>
-
-
