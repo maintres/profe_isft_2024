@@ -53,7 +53,7 @@ if (isset($_POST['Enviar'])) {
         $stmt->execute();
 
         $fila = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         // Verificar si las claves existen antes de usarlas
         $profesor = isset($fila['usuario_id']) ? $fila['usuario_id'] : '';
         $FechaInicio = isset($fila['fechadeinicio']) ? $fila['fechadeinicio'] : '';
@@ -91,6 +91,27 @@ if (isset($_POST['Enviar'])) {
                 <input class="form-control" type="date" name="Finicio" value="<?php echo htmlspecialchars($FechaInicio); ?>" required>
                 <p>Fecha de fin:</p>
                 <input class="form-control" type="date" name="Ffin" value="<?php echo htmlspecialchars($FechaFin); ?>" required><br>
+                <p>Tipo de Licencia</p>
+                <?php
+                // Consulta para obtener tipos de licencia activos
+                $cons = "SELECT id, tipodelicencia FROM tipos_licencias WHERE etapa = 'Activo'";
+                $resul = $db->query($cons);
+                if (!$resul) {
+                    die("Error en la consulta: " . $db->errorInfo()[2]);
+                }
+                ?>
+                <select class="form-select" name="idtipos_licencias" id="idtipos_licencias">
+                    <?php
+                    while ($opcion = $resul->fetch(PDO::FETCH_ASSOC)) {
+                    ?>
+                        <option value="<?php echo htmlspecialchars($opcion['id']); ?>">
+                            <?php echo htmlspecialchars($opcion['tipodelicencia']); ?>
+                        </option>
+                    <?php
+                    }
+                    ?>
+                </select>
+                <br>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
                 <input type="hidden" name="idtipos_licencias" value="<?php echo htmlspecialchars($idtipos_licencias); ?>">
                 <input class="btn btn-primary" type="submit" name="Enviar" value="Guardar Cambios">

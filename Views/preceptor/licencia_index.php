@@ -3,9 +3,10 @@ require '../../conn/connection.php';
 require 'navbar.php';
 
 // Usando PDO en lugar de mysqli
-$SQl = "SELECT l.id , l.fechadeinicio, l.fechadefin, u.nombre AS nombre_profesor, u.apellido AS apellido_profesor
+$SQl = "SELECT l.id , l.fechadeinicio, l.fechadefin, u.nombre AS nombre_profesor, u.apellido AS apellido_profesor,t.tipodelicencia AS tipo_licencia
         FROM licencias l
         INNER JOIN usuarios u ON l.usuario_id = u.id_usuario
+        INNER JOIN tipos_licencias t ON l.idtipos_licencias = t.id
         WHERE l.etapa = 'Activo' AND u.id_rol = 2"; // Filtrar por id_rol = 2
 
 try {
@@ -48,6 +49,7 @@ if (isset($_GET['txtID'])) {
                                 <th>Profesor</th>
                                 <th>Fecha de Inicio</th>
                                 <th>Fecha de Finalización</th>
+                                <th>Licencia</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -60,6 +62,7 @@ if (isset($_GET['txtID'])) {
                                     <td><?php echo htmlspecialchars($filas['nombre_profesor'] . ' ' . $filas['apellido_profesor'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($filas['fechadeinicio'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($filas['fechadefin'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($filas['tipo_licencia'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <a href="licencia_edit.php?id=<?php echo htmlspecialchars($filas['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm" role="button">
