@@ -10,27 +10,11 @@ if (isset($_POST['Enviar'])) {
     $FechaFin = $_POST['Ffin'];
     $etapa = "Activo";
 
-<<<<<<< HEAD
-    list($profesorId, $profesorNombre) = explode('|', $profesorSeleccionado);
-    # Asignar NULL si idtipos_licencias está vacío
-=======
     // Asignar NULL si idtipos_licencias está vacío
->>>>>>> 4140126 (Modifique varias cosas, por que cambie la bd para poder acceder ah la vista profesor y asi hacer las tareas que me dijo el profe, hagan una revison de sus modulos.)
     if (empty($idtipos_licencias)) {
         $idtipos_licencias = NULL;
     }
 
-<<<<<<< HEAD
-    $SQL = "UPDATE licencias SET nombre=?, fechadeinicio=?, fechadefin=?, idprofesor=?, idtipos_licencias=?, etapa=?  WHERE id=?";
-    $sentenciaPreparada = mysqli_prepare($conexion, $SQL);
-
-    # Cambiar el tipo de enlace para que soporte NULL
-    if ($idtipos_licencias === NULL) {
-        mysqli_stmt_bind_param($sentenciaPreparada, "sssiiis", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id, $profesorId, $etapa);
-    } else {
-        mysqli_stmt_bind_param($sentenciaPreparada, "sssiiis", $profesor, $FechaInicio, $FechaFin, $idtipos_licencias, $id, $profesorId, $etapa);
-    }
-=======
     try {
         $SQL = "UPDATE licencias SET usuario_id=?, fechadeinicio=?, fechadefin=?, idtipos_licencias=? WHERE id=?";
         $stmt = $db->prepare($SQL);
@@ -41,7 +25,6 @@ if (isset($_POST['Enviar'])) {
         $stmt->bindParam(3, $FechaFin);
         $stmt->bindValue(4, $idtipos_licencias, PDO::PARAM_INT);
         $stmt->bindParam(5, $id, PDO::PARAM_INT);
->>>>>>> 4140126 (Modifique varias cosas, por que cambie la bd para poder acceder ah la vista profesor y asi hacer las tareas que me dijo el profe, hagan una revison de sus modulos.)
 
         if ($stmt->execute()) {
             echo "<script>
@@ -70,7 +53,7 @@ if (isset($_POST['Enviar'])) {
         $stmt->execute();
 
         $fila = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         // Verificar si las claves existen antes de usarlas
         $profesor = isset($fila['usuario_id']) ? $fila['usuario_id'] : '';
         $FechaInicio = isset($fila['fechadeinicio']) ? $fila['fechadeinicio'] : '';
@@ -102,52 +85,35 @@ if (isset($_POST['Enviar'])) {
                         </option>
                     <?php
                     }
-<<<<<<< HEAD
-                    
-                    ?>
-                </select>
-                <!-- -------------------------------------- -->
-                <div class="form-group">
-                   <label for="Finicio">Fecha de inicio:</label>
-                   <input class="form-control datepicker-date" type="date" name="Finicio" value="<?php echo $FechaInicio; ?>">
-                </div>
-                <!-- -------------------------------------- -->
-                <div class="form-group">
-                    <label for="Finicio">Fecha de fin:</label>
-                    <input class="form-control datepicker-date" type="date" name="Ffin" value="<?php echo $FechaFin; ?>">
-                </div>
-                <!-- -------------------------------------- -->
-                
-                <p class="form-label mt-4">Tipo de licencia</p>
-                <?php
-                 $cons = "SELECT * FROM tipos_licencias WHERE etapa = 'Activo'";
-                 $resul = mysqli_query($conexion, $cons);
-                  ?>
-                <select class="form-select" name="tipoLicencia" id="">
-                <?php
-                 while ($opcion = mysqli_fetch_assoc($resul)) {
-                 ?>
-                    <option value="<?php echo $opcion['id'] . '|' . $opcion['tipodelicencia'];?>">
-                    <?php echo $opcion['tipodelicencia']; ?>
-                    </option>
-                    <?php
-                 }
-                 mysqli_close($conexion);
-                    ?>
-                </select>
-                <br>
-                <input type="hidden" name="id" value="<?php echo $id; ?>">
-                <input type="hidden" id="idtipos_licencias" name="idtipos_licencias" value="">
-=======
                     ?>
                 </select>
                 <p class="form-label mt-4">Fecha de inicio:</p>
                 <input class="form-control" type="date" name="Finicio" value="<?php echo htmlspecialchars($FechaInicio); ?>" required>
                 <p>Fecha de fin:</p>
                 <input class="form-control" type="date" name="Ffin" value="<?php echo htmlspecialchars($FechaFin); ?>" required><br>
+                <p>Tipo de Licencia</p>
+                <?php
+                // Consulta para obtener tipos de licencia activos
+                $cons = "SELECT id, tipodelicencia FROM tipos_licencias WHERE etapa = 'Activo'";
+                $resul = $db->query($cons);
+                if (!$resul) {
+                    die("Error en la consulta: " . $db->errorInfo()[2]);
+                }
+                ?>
+                <select class="form-select" name="idtipos_licencias" id="idtipos_licencias">
+                    <?php
+                    while ($opcion = $resul->fetch(PDO::FETCH_ASSOC)) {
+                    ?>
+                        <option value="<?php echo htmlspecialchars($opcion['id']); ?>">
+                            <?php echo htmlspecialchars($opcion['tipodelicencia']); ?>
+                        </option>
+                    <?php
+                    }
+                    ?>
+                </select>
+                <br>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
                 <input type="hidden" name="idtipos_licencias" value="<?php echo htmlspecialchars($idtipos_licencias); ?>">
->>>>>>> 4140126 (Modifique varias cosas, por que cambie la bd para poder acceder ah la vista profesor y asi hacer las tareas que me dijo el profe, hagan una revison de sus modulos.)
                 <input class="btn btn-primary" type="submit" name="Enviar" value="Guardar Cambios">
                 <button class="btn btn-warning"><a href="licencia_index.php" style="color: inherit; text-decoration: none;">Volver al Listado</a></button>
             </form>
