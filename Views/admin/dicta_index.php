@@ -2,13 +2,10 @@
 include("../../conn/connection.php");
 include("navbar.php");
 
-// Establecer atributos de error para PDO
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Capturar la etapa seleccionada del filtro, por defecto se muestran todos
 $etapa = isset($_GET['etapa']) ? $_GET['etapa'] : 'Todos';
 
-// Inicializar la consulta SQL
 $sql = "SELECT d.id, CONCAT(u.nombre, ' ', u.apellido) AS nombre_profesor, u.dni AS dni_profesor, m.nombre AS nombre_materia, c.nombre AS nombre_carrera, d.tipo, d.Baja, d.Fecha_baja, d.motivo_baja, d.etapa
         FROM dicta d
         INNER JOIN usuarios u ON d.usuario_id = u.id_usuario
@@ -34,13 +31,11 @@ try {
     exit;
 }
 
-// Procesar la baja y actualización de la etapa si se ha enviado el formulario del modal
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
     $txtID = $_POST['txtID'];
     $motivo_baja = $_POST['motivo_baja'];
     $fecha_baja = date('Y-m-d');
-
-    $sql_update = "UPDATE dicta SET motivo_baja = :motivo_baja, Fecha_baja = :fecha_baja, etapa = 'Inactivo' WHERE id = :id";
+    $sql_update = "UPDATE dicta SET motivo_baja = :motivo_baja, Fecha_baja = :fecha_baja, etapa = 'Inactivo', Baja = 'Sí' WHERE id = :id";
     $stmt_update = $db->prepare($sql_update);
     $stmt_update->bindParam(':motivo_baja', $motivo_baja);
     $stmt_update->bindParam(':fecha_baja', $fecha_baja);
@@ -48,14 +43,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
 
     try {
         $stmt_update->execute();
-        header("Location: dicta_index.php?mensaje=Registro%20Actualizado%20a%20Inactivo");
-        exit;
+        echo "<script>
+                window.onload = function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registro Dado de Baja exitosamente.',
+                        text: 'La baja ha sido registrada.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = 'dicta_index.php'; // Redirigir a la página de índice
+                    });
+                }
+              </script>";
     } catch (PDOException $e) {
-        echo "Error al actualizar: " . $e->getMessage();
-        exit;
+        echo "<script>
+                window.onload = function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '" . $e->getMessage() . "',
+                        showConfirmButton: true
+                    });
+                }
+              </script>";
     }
 }
+
 ?>
+ <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            
+            if (status === 'success') {
+                Swal.fire({
+                    title: 'Éxito!',
+                    text: 'Asignación editada con éxito.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            } else if (status === 'error') {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Hubo un problema al actualizar la asignación.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    </script>
 
 <section class="content mt-3">
     <div class="row m-auto">
@@ -66,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
                     <a class="btn btn-primary float-right mb-2" href="dicta_crea.php">Agregar Nueva Asignación</a>
                 </div>
                 <div class="card-body table-responsive">
-                    <!-- Formulario de Filtro -->
+              
                     <form method="get" action="dicta_index.php" class="form-inline justify-content-start my-1">
                         <div class="form-group">
                             <label for="etapa" class="label label-default">Filtrar por Estado: </label>
@@ -77,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
                             </select>
                         </div>
                     </form>
-                    <!-- Tabla de Asignaciones -->
+                   
                     <?php if (empty($resultado)) : ?>
                         <div class="alert alert-info">No hay registros disponibles.</div>
                     <?php else : ?>
@@ -128,39 +165,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
         </div>
     </div>
 </section>
-
-<!-- Modal para ingresar motivo de baja -->
-<div id="bajaModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form method="post" action="dicta_index.php">
-                <div class="modal-header">
-                    <h5 class="modal-title">Motivo de Baja</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="txtID" id="txtID">
-                    <div class="form-group">
-                        <label for="motivo_baja">Motivo de Baja</label>
-                        <textarea class="form-control" id="motivo_baja" name="motivo_baja" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-danger">Guardar</button>
-                </div>
-            </form>
+<div id="bajaModal" class="modal fade" tabindex="-1" aria-labelledby="bajaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="dicta_index.php">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bajaModalLabel">Motivo de Baja</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+          <input type="hidden" name="txtID" id="txtID">
+          <div class="mb-3">
+            <label for="motivo_baja" class="form-label">Motivo de Baja</label>
+            <textarea class="form-control" id="motivo_baja" name="motivo_baja" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="submit" class="btn btn-danger">Guardar</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
-
 <script>
 function showBajaModal(id) {
     document.getElementById('txtID').value = id;
-    $('#bajaModal').modal('show');
+    var myModal = new bootstrap.Modal(document.getElementById('bajaModal'));
+    myModal.show();
 }
 </script>
-
-<?php require("footer.php"); ?>
