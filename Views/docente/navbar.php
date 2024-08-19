@@ -128,9 +128,6 @@ if(!isset($_SESSION['nombre'])){
               <a class="nav-link " href="listar_registros.php">Marcar Asistencia</a>
             </li>
              <!-- ------------------------------------------------------- -->
-             <li class="nav-item  pr-3">
-              <a class="nav-link " href="agregar_registro.php">Agregar</a>
-            </li>
             <!-- ------------------------------------------------------- -->            
           </ul>     
           <!-- ------------------------------------------------------- -->
