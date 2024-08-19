@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 10-08-2024 a las 22:59:37
+-- Tiempo de generación: 20-08-2024 a las 00:06:26
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -109,10 +109,9 @@ CREATE TABLE `dicta` (
 --
 
 INSERT INTO `dicta` (`id`, `usuario_id`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `FK_carrera`, `etapa`) VALUES
-(1, 2, 1, 'titular', 'SI', NULL, NULL, 1, 'Activo'),
-(2, 3, 3, 'titular', 'SI', NULL, NULL, 2, 'Activo'),
-(3, 5, 2, 'titular', 'SI', NULL, NULL, 1, 'Activo'),
-(4, 5, 1, 'titular', 'SI', NULL, NULL, 1, 'Activo');
+(1, 5, 1, 'titular', 'NO', NULL, NULL, 1, 'Activo'),
+(2, 3, 3, 'titular', 'NO', NULL, NULL, 2, 'Activo'),
+(3, 3, 2, 'titular', 'NO', NULL, NULL, 1, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -134,7 +133,7 @@ CREATE TABLE `licencias` (
 --
 
 INSERT INTO `licencias` (`id`, `fechadeinicio`, `fechadefin`, `usuario_id`, `idtipos_licencias`, `etapa`) VALUES
-(1, '2024-08-10', '2024-08-24', 2, 7, 'Activo');
+(1, '2024-08-10', '2024-08-24', 2, 7, 'Inactivo');
 
 -- --------------------------------------------------------
 
@@ -166,16 +165,6 @@ CREATE TABLE `registro_clases` (
   `hora_salida` time DEFAULT NULL,
   `etapa` enum('Activo','Inactivo') NOT NULL DEFAULT 'Activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `registro_clases`
---
-
-INSERT INTO `registro_clases` (`id`, `usuario_id`, `carrera_id`, `materia_id`, `fecha`, `hora_entrada`, `hora_salida`, `etapa`) VALUES
-(1, 3, 2, 3, '2024-08-10', '16:28:23', '16:31:10', 'Activo'),
-(2, 2, 1, 1, '2024-08-10', '16:43:16', '16:43:29', 'Activo'),
-(3, 5, 1, 1, '2024-08-10', '17:33:29', '17:46:08', 'Activo'),
-(4, 5, 1, 2, '2024-08-10', '17:34:02', '17:46:19', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -378,7 +367,7 @@ ALTER TABLE `carreras`
 -- AUTO_INCREMENT de la tabla `dicta`
 --
 ALTER TABLE `dicta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `licencias`
@@ -396,7 +385,7 @@ ALTER TABLE `permisos`
 -- AUTO_INCREMENT de la tabla `registro_clases`
 --
 ALTER TABLE `registro_clases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`

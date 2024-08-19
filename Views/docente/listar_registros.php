@@ -6,8 +6,23 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id)
-{
+function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id) {
+    $hora_actual = date("H:i:s");
+    $hora_inicio = "18:30:00";
+    $hora_fin = "22:30:00";
+
+    if ($hora_actual < $hora_inicio || $hora_actual > $hora_fin) {
+        echo "<script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Hora inválida',
+                text: 'El registro de entrada solo se puede hacer entre las 18:30 y las 22:30.',
+                showConfirmButton: true
+            });
+        </script>";
+        return false;
+    }
+
     $sql_insert = "INSERT INTO registro_clases (usuario_id, carrera_id, materia_id, fecha, hora_entrada) VALUES (?, ?, ?, ?, ?)";
     $stmt_insert = $conexion->prepare($sql_insert);
     $fecha = date("Y-m-d");
@@ -20,7 +35,35 @@ function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id) {
     $fecha = date("Y-m-d");
     $hora_salida = date("H:i:s");
 
-    // Consulta SQL para actualizar la hora de salida
+    // Obtener la hora de entrada del registro actual
+    $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha);
+    if ($registro) {
+        $hora_entrada = $registro['hora_entrada'];
+        $hora_minima_salida = date("H:i:s", strtotime($hora_entrada) + 3 * 3600);
+
+        if ($hora_salida < $hora_minima_salida) {
+            echo "<script>
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tiempo insuficiente',
+                    text: 'La salida solo puede registrarse después de haber pasado al menos 3 horas desde la entrada.',
+                    showConfirmButton: true
+                });
+            </script>";
+            return false;
+        }
+    } else {
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'No se encontró el registro de entrada',
+                text: 'Asegúrate de haber registrado la entrada antes de registrar la salida.',
+                showConfirmButton: true
+            });
+        </script>";
+        return false;
+    }
+
     $sql_update = "UPDATE registro_clases SET hora_salida = ? WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
     $stmt_update = $conexion->prepare($sql_update);
 
@@ -28,47 +71,37 @@ function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id) {
         die('Error en prepare: ' . $conexion->error);
     }
 
-    // Ajuste de los parámetros para bind_param:
-    // 's' para hora_salida (cadena de texto)
-    // 'i' para usuario_id, carrera_id, y materia_id (enteros)
-    // 's' para fecha (cadena de texto)
     $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha);
 
     if (!$stmt_update->execute()) {
-        echo "Error al ejecutar la consulta: " . $stmt_update->error;
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al registrar la salida',
+                text: 'Por favor, inténtalo de nuevo.',
+                showConfirmButton: true
+            });
+        </script>";
     }
     return $stmt_update->execute();
 }
 
-function obtenerRegistro($conexion, $usuario_id, $carrera_id, $materia_id)
-{
+function obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha) {
     $sql_check = "SELECT * FROM registro_clases WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ?";
     $stmt_check = $conexion->prepare($sql_check);
-    $fecha = date("Y-m-d");
     $stmt_check->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha);
     $stmt_check->execute();
     return $stmt_check->get_result()->fetch_assoc();
 }
 
-function determinarEstado($registro) {
-    if ($registro) {
-        if (!empty($registro['hora_entrada']) && !empty($registro['hora_salida'])) {
-            return 'Presente';
-        } else {
-            return 'Ausente';
-        }
-    }
-    return 'Pendiente';
-}
-
-function procesarFormulario($conexion)
-{
+function procesarFormulario($conexion) {
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $usuario_id = $_POST['usuario_id'];
         $carrera_id = $_POST['carrera_id'];
         $materia_id = $_POST['materia_id'];
+        $fecha_actual = date("Y-m-d");
 
-        $registro = obtenerRegistro($conexion, $usuario_id, $carrera_id, $materia_id);
+        $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_actual);
 
         if (isset($_POST['buscar1'])) {
             if (!$registro) {
@@ -79,15 +112,6 @@ function procesarFormulario($conexion)
                             title: 'Hora de entrada registrada',
                             showConfirmButton: false,
                             timer: 1500
-                        });
-                    </script>";
-                } else {
-                    echo "<script>
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error al registrar la entrada',
-                            text: 'Por favor, inténtalo de nuevo.',
-                            showConfirmButton: true
                         });
                     </script>";
                 }
@@ -112,15 +136,6 @@ function procesarFormulario($conexion)
                             timer: 1500
                         });
                     </script>";
-                } else {
-                    echo "<script>
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error al registrar la salida',
-                            text: 'Por favor, inténtalo de nuevo.',
-                            showConfirmButton: true
-                        });
-                    </script>";
                 }
             } else {
                 echo "<script>
@@ -143,8 +158,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['id_rol'] != 2) {
 }
 $usuario_id = $_SESSION['id_usuario'];
 
-function getMateriasAndCarreras($db, $usuario_id)
-{
+function getMateriasAndCarreras($db, $usuario_id) {
     $queryMaterias = "
         SELECT c.id AS carrera_id, c.nombre AS carrera_nombre, a.id AS materia_id, a.nombre AS materia_nombre
         FROM asignaturas a
@@ -159,8 +173,7 @@ function getMateriasAndCarreras($db, $usuario_id)
     return $stmtMaterias->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getRegistros($db, $usuario_id)
-{
+function getRegistros($db, $usuario_id) {
     $queryRegistros = "
         SELECT carrera_id, materia_id, fecha, hora_entrada, hora_salida
         FROM registro_clases
@@ -205,7 +218,7 @@ foreach ($registros as $registro) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
+                        <?php
                             $i = 1;
                             foreach ($materias as $materia) {
                                 $key = $materia['carrera_id'] . '-' . $materia['materia_id'];
@@ -217,12 +230,12 @@ foreach ($registros as $registro) {
                             ?>
                             <tr>
                                 <td><?php echo $i++; ?></td>
-                                <td><?php echo htmlspecialchars($materia['carrera_nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($materia['materia_nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($materia['carrera_nombre'] ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($materia['materia_nombre'] ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo $estado; ?></td>
-                                <td><?php echo htmlspecialchars($hora_entrada, ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($hora_salida, ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($fecha_salida, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($hora_entrada ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($hora_salida ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($fecha_salida ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td class="text-center">
                                     <?php if (!$registro || !$registro['hora_salida']) { ?>
                                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mi-modal-<?php echo $materia['materia_id']; ?>">
@@ -246,8 +259,6 @@ foreach ($registros as $registro) {
                                                         <input type="hidden" name="usuario_id" value="<?php echo htmlspecialchars($usuario_id); ?>">
                                                         <input type="hidden" name="carrera_id" value="<?php echo htmlspecialchars($materia['carrera_id']); ?>">
                                                         <input type="hidden" name="materia_id" value="<?php echo htmlspecialchars($materia['materia_id']); ?>">
-                                                        <input type="hidden" name="fecha" value="<?php echo date("Y-m-d"); ?>">
-                                                        <input type="hidden" name="hora" value="<?php echo date("H:i:s"); ?>">
                                                         <div class="form-group d-flex">
                                                             <b>Docente:</b>
                                                             <p><?php echo ": " . $_SESSION['nombre']; ?></p>
@@ -269,8 +280,12 @@ foreach ($registros as $registro) {
                                                             <p><?php echo ": " . date("H:i:s"); ?></p>
                                                         </div>
                                                         <div class="btn-group d-flex pt-2">
-                                                            <button type="submit" name="buscar1" class="btn btn-primary w-100">Entrada</button>
-                                                            <button type="submit" name="buscar2" class="btn btn-danger w-100">Salida</button>
+                                                            <?php if (!$registro || empty($registro['hora_entrada'])) { ?>
+                                                                <button type="submit" name="buscar1" class="btn btn-primary w-100">Entrada</button>
+                                                            <?php } ?>
+                                                            <?php if ($registro && empty($registro['hora_salida'])) { ?>
+                                                                <button type="submit" name="buscar2" class="btn btn-danger w-100">Salida</button>
+                                                            <?php } ?>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -288,6 +303,3 @@ foreach ($registros as $registro) {
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<?php require 'footer.php'; ?>
