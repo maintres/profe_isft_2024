@@ -54,7 +54,7 @@ CREATE TABLE `asistencia` (
   `id` int(11) NOT NULL,
   `profesor_id` int(11) NOT NULL,
   `fecha` date NOT NULL,
-  `estado` enum('Presente','Ausente','Tarde') NOT NULL,
+  `estado` enum('Presente','Ausente','Tarde','Justificada') NOT NULL,
   `etapa` enum('Activo','Inactivo') DEFAULT 'Activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
