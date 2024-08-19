@@ -6,87 +6,70 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id) {
-    $hora_actual = date("H:i:s");
-    $hora_inicio = "18:30:00";
-    $hora_fin = "22:30:00";
-
-    if ($hora_actual < $hora_inicio || $hora_actual > $hora_fin) {
-        echo "<script>
-            Swal.fire({
-                icon: 'warning',
-                title: 'Hora inválida',
-                text: 'El registro de entrada solo se puede hacer entre las 18:30 y las 22:30.',
-                showConfirmButton: true
-            });
-        </script>";
-        return false;
-    }
-
+function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)
+{
     $sql_insert = "INSERT INTO registro_clases (usuario_id, carrera_id, materia_id, fecha, hora_entrada) VALUES (?, ?, ?, ?, ?)";
     $stmt_insert = $conexion->prepare($sql_insert);
-    $fecha = date("Y-m-d");
+    $fecha = $fecha_simulada;
     $hora_entrada = date("H:i:s");
     $stmt_insert->bind_param('iiiss', $usuario_id, $carrera_id, $materia_id, $fecha, $hora_entrada);
     return $stmt_insert->execute();
 }
 
-function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id) {
-    $fecha = date("Y-m-d");
-    $hora_salida = date("H:i:s");
+function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)
+{
+    $hora_salida = date("H:i:s"); // Hora actual
 
-    // Obtener la hora de entrada del registro actual
-    $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha);
-    if ($registro) {
-        $hora_entrada = $registro['hora_entrada'];
-        $hora_minima_salida = date("H:i:s", strtotime($hora_entrada) + 3 * 3600);
+    // Obtener la hora de entrada
+    $sql_select = "SELECT hora_entrada FROM registro_clases WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
+    $stmt_select = $conexion->prepare($sql_select);
+    $stmt_select->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
+    $stmt_select->execute();
+    $resultado = $stmt_select->get_result()->fetch_assoc();
 
-        if ($hora_salida < $hora_minima_salida) {
+    if ($resultado) {
+        $hora_entrada = $resultado['hora_entrada'];
+
+        // Calcular el tiempo transcurrido en minutos
+        $hora_entrada_dt = new DateTime($hora_entrada);
+        $hora_salida_dt = new DateTime($hora_salida);
+        $intervalo = $hora_entrada_dt->diff($hora_salida_dt);
+        $minutos_transcurridos = ($intervalo->h * 60) + $intervalo->i;
+
+        // Validar que hayan pasado al menos 40 minutos
+        if ($minutos_transcurridos >= 40) {
+            $sql_update = "UPDATE registro_clases SET hora_salida = ? WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
+            $stmt_update = $conexion->prepare($sql_update);
+            $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
+            return $stmt_update->execute();
+        } else {
+            // Mensaje de error si no han pasado 40 minutos
             echo "<script>
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Tiempo insuficiente',
-                    text: 'La salida solo puede registrarse después de haber pasado al menos 3 horas desde la entrada.',
+                    title: 'Error',
+                    text: 'No se puede registrar la salida antes de que hayan pasado 40 minutos desde la entrada.',
                     showConfirmButton: true
                 });
             </script>";
             return false;
         }
     } else {
+        // Mensaje de error si no hay registro de entrada
         echo "<script>
             Swal.fire({
-                icon: 'error',
-                title: 'No se encontró el registro de entrada',
-                text: 'Asegúrate de haber registrado la entrada antes de registrar la salida.',
+                icon: 'warning',
+                title: 'Registro inválido',
+                text: 'No hay registro de entrada para esta fecha.',
                 showConfirmButton: true
             });
         </script>";
         return false;
     }
-
-    $sql_update = "UPDATE registro_clases SET hora_salida = ? WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
-    $stmt_update = $conexion->prepare($sql_update);
-
-    if ($stmt_update === false) {
-        die('Error en prepare: ' . $conexion->error);
-    }
-
-    $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha);
-
-    if (!$stmt_update->execute()) {
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al registrar la salida',
-                text: 'Por favor, inténtalo de nuevo.',
-                showConfirmButton: true
-            });
-        </script>";
-    }
-    return $stmt_update->execute();
 }
 
-function obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha) {
+function obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha)
+{
     $sql_check = "SELECT * FROM registro_clases WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ?";
     $stmt_check = $conexion->prepare($sql_check);
     $stmt_check->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha);
@@ -94,24 +77,34 @@ function obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id,
     return $stmt_check->get_result()->fetch_assoc();
 }
 
-function procesarFormulario($conexion) {
+function procesarFormulario($conexion)
+{
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $usuario_id = $_POST['usuario_id'];
         $carrera_id = $_POST['carrera_id'];
         $materia_id = $_POST['materia_id'];
-        $fecha_actual = date("Y-m-d");
+        $fecha_simulada = '2024-08-20'; // Cambia esto según la fecha que desees simular
 
-        $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_actual);
+        $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
 
         if (isset($_POST['buscar1'])) {
             if (!$registro) {
-                if (registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id)) {
+                if (registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)) {
                     echo "<script>
                         Swal.fire({
                             icon: 'success',
                             title: 'Hora de entrada registrada',
                             showConfirmButton: false,
                             timer: 1500
+                        });
+                    </script>";
+                } else {
+                    echo "<script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al registrar la entrada',
+                            text: 'Por favor, inténtalo de nuevo.',
+                            showConfirmButton: true
                         });
                     </script>";
                 }
@@ -127,7 +120,7 @@ function procesarFormulario($conexion) {
             }
         } elseif (isset($_POST['buscar2'])) {
             if ($registro && empty($registro['hora_salida'])) {
-                if (registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id)) {
+                if (registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)) {
                     echo "<script>
                         Swal.fire({
                             icon: 'success',
@@ -136,6 +129,8 @@ function procesarFormulario($conexion) {
                             timer: 1500
                         });
                     </script>";
+                } else {
+                    // La función registrarSalida ya maneja los errores
                 }
             } else {
                 echo "<script>
@@ -158,7 +153,8 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['id_rol'] != 2) {
 }
 $usuario_id = $_SESSION['id_usuario'];
 
-function getMateriasAndCarreras($db, $usuario_id) {
+function getMateriasAndCarreras($db, $usuario_id)
+{
     $queryMaterias = "
         SELECT c.id AS carrera_id, c.nombre AS carrera_nombre, a.id AS materia_id, a.nombre AS materia_nombre
         FROM asignaturas a
@@ -173,7 +169,8 @@ function getMateriasAndCarreras($db, $usuario_id) {
     return $stmtMaterias->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getRegistros($db, $usuario_id) {
+function getRegistros($db, $usuario_id)
+{
     $queryRegistros = "
         SELECT carrera_id, materia_id, fecha, hora_entrada, hora_salida
         FROM registro_clases
