@@ -199,8 +199,13 @@ $fecha_actual = date('Y-m-d');
             <div class="card rounded-2 border-0">
                 <div class="card-header bg-dark text-white pb-0">
                     <h5 class="d-inline-block">Listado de Registros de Clases</h5>
+<<<<<<< HEAD
+                    <!-- <a class="btn btn-warning float-right mb-2 mr-3" href="">Listar Asistencias</a> 
+                    <p class="float-right">**posible boton para listar la tabla "registro_clases"**</p>                 -->
+=======
                     <a class="btn btn-warning float-right mb-2 mr-3" href="">Listar Asistencias</a>
                     <p class="float-right">**posible boton para listar la tabla "registro_clases"**</p>
+>>>>>>> 010eaf19db0ac2515afc865e51c705c79ef163ed
                 </div>
                 <div class="card-body table-responsive">
                     <table id="example" class="table table-striped table-sm" style="width:100%">

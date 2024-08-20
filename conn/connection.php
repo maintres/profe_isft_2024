@@ -20,4 +20,6 @@ if ($conexion->connect_error) {
 }
 // -------Consideraciones de Zona Horaria----------
 date_default_timezone_set('America/Argentina/Buenos_Aires');
+//Asia/Kuwait
+//Asia/Tokyo	
 ?>
