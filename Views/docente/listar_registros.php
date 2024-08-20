@@ -1,29 +1,30 @@
 <?php
 require 'navbar.php';
 include('../../conn/connection.php');
+
 // Habilitar visualización de errores
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)
+function registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha)
 {
     $sql_insert = "INSERT INTO registro_clases (usuario_id, carrera_id, materia_id, fecha, hora_entrada) VALUES (?, ?, ?, ?, ?)";
     $stmt_insert = $conexion->prepare($sql_insert);
-    $fecha = $fecha_simulada;
+    $fecha = date('Y-m-d');
     $hora_entrada = date("H:i:s");
     $stmt_insert->bind_param('iiiss', $usuario_id, $carrera_id, $materia_id, $fecha, $hora_entrada);
     return $stmt_insert->execute();
 }
 
-function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)
+function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha)
 {
     $hora_salida = date("H:i:s"); // Hora actual
 
     // Obtener la hora de entrada
     $sql_select = "SELECT hora_entrada FROM registro_clases WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
     $stmt_select = $conexion->prepare($sql_select);
-    $stmt_select->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
+    $stmt_select->bind_param('iiis', $usuario_id, $carrera_id, $materia_id, $fecha);
     $stmt_select->execute();
     $resultado = $stmt_select->get_result()->fetch_assoc();
 
@@ -40,7 +41,7 @@ function registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fech
         if ($minutos_transcurridos >= 40) {
             $sql_update = "UPDATE registro_clases SET hora_salida = ? WHERE usuario_id = ? AND carrera_id = ? AND materia_id = ? AND fecha = ? AND hora_salida IS NULL";
             $stmt_update = $conexion->prepare($sql_update);
-            $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
+            $stmt_update->bind_param('siiis', $hora_salida, $usuario_id, $carrera_id, $materia_id, $fecha);
             return $stmt_update->execute();
         } else {
             // Mensaje de error si no han pasado 40 minutos
@@ -83,13 +84,13 @@ function procesarFormulario($conexion)
         $usuario_id = $_POST['usuario_id'];
         $carrera_id = $_POST['carrera_id'];
         $materia_id = $_POST['materia_id'];
-        $fecha_simulada = '2024-08-20'; // Cambia esto según la fecha que desees simular
+        $fecha = date('Y-m-d'); // Inicializar la fecha aquí
 
-        $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada);
+        $registro = obtenerRegistroDelDia($conexion, $usuario_id, $carrera_id, $materia_id, $fecha);
 
         if (isset($_POST['buscar1'])) {
             if (!$registro) {
-                if (registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)) {
+                if (registrarEntrada($conexion, $usuario_id, $carrera_id, $materia_id, $fecha)) {
                     echo "<script>
                         Swal.fire({
                             icon: 'success',
@@ -120,7 +121,7 @@ function procesarFormulario($conexion)
             }
         } elseif (isset($_POST['buscar2'])) {
             if ($registro && empty($registro['hora_salida'])) {
-                if (registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha_simulada)) {
+                if (registrarSalida($conexion, $usuario_id, $carrera_id, $materia_id, $fecha)) {
                     echo "<script>
                         Swal.fire({
                             icon: 'success',
@@ -190,6 +191,7 @@ foreach ($registros as $registro) {
     $key = $registro['carrera_id'] . '-' . $registro['materia_id'];
     $registrosMap[$key] = $registro;
 }
+$fecha_actual = date('Y-m-d');
 ?>
 <section class="content mt-3">
     <div class="row m-auto">
@@ -197,8 +199,13 @@ foreach ($registros as $registro) {
             <div class="card rounded-2 border-0">
                 <div class="card-header bg-dark text-white pb-0">
                     <h5 class="d-inline-block">Listado de Registros de Clases</h5>
+<<<<<<< HEAD
                     <!-- <a class="btn btn-warning float-right mb-2 mr-3" href="">Listar Asistencias</a> 
                     <p class="float-right">**posible boton para listar la tabla "registro_clases"**</p>                 -->
+=======
+                    <a class="btn btn-warning float-right mb-2 mr-3" href="">Listar Asistencias</a>
+                    <p class="float-right">**posible boton para listar la tabla "registro_clases"**</p>
+>>>>>>> 010eaf19db0ac2515afc865e51c705c79ef163ed
                 </div>
                 <div class="card-body table-responsive">
                     <table id="example" class="table table-striped table-sm" style="width:100%">
@@ -220,21 +227,27 @@ foreach ($registros as $registro) {
                             foreach ($materias as $materia) {
                                 $key = $materia['carrera_id'] . '-' . $materia['materia_id'];
                                 $registro = isset($registrosMap[$key]) ? $registrosMap[$key] : null;
-                                $estado = $registro ? ($registro['hora_salida'] ? 'Presente' : 'Ausente') : 'No Registrado';
-                                $hora_entrada = $registro ? $registro['hora_entrada'] : 'No Registrado';
-                                $hora_salida = $registro ? $registro['hora_salida'] : 'No Registrado';
-                                $fecha_salida = $registro ? $registro['fecha'] : 'No Registrado';
-                            ?>
+                                $estado = $registro && $registro['fecha'] == $fecha_actual
+                                    ? ($registro['hora_salida'] ? 'Presente' : 'Ausente')
+                                    : 'No Registrado';
+                                $hora_entrada = $registro && $registro['fecha'] == $fecha_actual
+                                    ? $registro['hora_entrada']
+                                    : '---';
+                                $hora_salida = $registro && $registro['fecha'] == $fecha_actual
+                                    ? $registro['hora_salida']
+                                    : '---';
+                                $fecha_registro = $registro ? $registro['fecha'] : '---';
+                        ?>
                             <tr>
                                 <td><?php echo $i++; ?></td>
-                                <td><?php echo htmlspecialchars($materia['carrera_nombre'] ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($materia['materia_nombre'] ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($materia['carrera_nombre'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($materia['materia_nombre'] ?? ''); ?></td>
                                 <td><?php echo $estado; ?></td>
-                                <td><?php echo htmlspecialchars($hora_entrada ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($hora_salida ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($fecha_salida ?? 'No Registrado', ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($hora_entrada ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($hora_salida ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($fecha_registro ?? ''); ?></td>
                                 <td class="text-center">
-                                    <?php if (!$registro || !$registro['hora_salida']) { ?>
+                                    <?php if (!$registro || $registro['fecha'] != $fecha_actual || !$registro['hora_salida']) { ?>
                                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mi-modal-<?php echo $materia['materia_id']; ?>">
                                             Asistencia
                                         </button>
@@ -277,10 +290,10 @@ foreach ($registros as $registro) {
                                                             <p><?php echo ": " . date("H:i:s"); ?></p>
                                                         </div>
                                                         <div class="btn-group d-flex pt-2">
-                                                            <?php if (!$registro || empty($registro['hora_entrada'])) { ?>
+                                                            <?php if (!$registro || $registro['fecha'] != $fecha_actual || empty($registro['hora_entrada'])) { ?>
                                                                 <button type="submit" name="buscar1" class="btn btn-primary w-100">Entrada</button>
                                                             <?php } ?>
-                                                            <?php if ($registro && empty($registro['hora_salida'])) { ?>
+                                                            <?php if ($registro && $registro['fecha'] == $fecha_actual && empty($registro['hora_salida'])) { ?>
                                                                 <button type="submit" name="buscar2" class="btn btn-danger w-100">Salida</button>
                                                             <?php } ?>
                                                         </div>
@@ -291,7 +304,7 @@ foreach ($registros as $registro) {
                                     </div>
                                 </td>
                             </tr>
-                            <?php } ?>
+                        <?php } ?>
                         </tbody>
                     </table>
                 </div>
@@ -299,4 +312,3 @@ foreach ($registros as $registro) {
         </div>
     </div>
 </section>
-
