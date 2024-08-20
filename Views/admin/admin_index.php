@@ -37,9 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: " . $redirect_url);
             exit();
         } else {
+            $dni=0;
             // Inserta datos en la base de datos
-            $sql = "INSERT INTO usuarios (nombre, correo, password, id_rol, etapa ) 
-                    VALUES (:nombre, :correo, :password, :id_rol, :etapa)";
+            $sql = "INSERT INTO usuarios (nombre, correo, password, id_rol, etapa,dni ) 
+                    VALUES (:nombre, :correo, :password, :id_rol, :etapa, :dni)";
 
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':nombre', $nombre); 
@@ -47,6 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(':password', $password);
             $stmt->bindParam(':id_rol', $id_rol);
             $stmt->bindParam(':etapa', $etapa);
+            $stmt->bindParam(':dni', $dni);
+
 
             if ($stmt->execute()) {
                 // Redirige a alumno_index.php con mensaje de éxito
