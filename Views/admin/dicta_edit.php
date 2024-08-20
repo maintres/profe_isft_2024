@@ -4,12 +4,11 @@ include '../../conn/connection.php';
 // Variables para almacenar los valores del formulario y mensajes de error
 $id = $profesor_id = $materia_id = $tipo = $carrera_id = $error = "";
 $baja = $fecha_baja = $motivo_baja = "";
-$etapa = "Activo"; // Por defecto se establece como activo
+$etapa = "Activo"; 
+
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-
-    // Obtener los datos actuales del registro
     $sql = "SELECT d.*, u.nombre, u.apellido, u.dni 
             FROM dicta d 
             JOIN usuarios u ON d.usuario_id = u.id_usuario 
@@ -47,7 +46,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $baja = isset($_POST["baja"]) ? "SI" : "NO";
     $fecha_baja = !empty($_POST["fecha_baja"]) ? trim($_POST["fecha_baja"]) : NULL;
     $motivo_baja = !empty($_POST["motivo_baja"]) ? trim($_POST["motivo_baja"]) : NULL;
-    $etapa = "Activo"; // Siempre activo a menos que se marque como inactivo
+
+    if($baja==='SI'){
+        $etapa='Inactivo';
+    }
+
 
     // Validar campos obligatorios
     if (empty($profesor_id) || empty($materia_id) || empty($tipo) || empty($carrera_id)) {
@@ -90,6 +93,7 @@ $query_carreras = "SELECT id, nombre FROM carreras ORDER BY nombre";
 $result_carreras = $db->query($query_carreras);
 ?>
 
+<!-- -------------------------------------- -->
 <?php require 'navbar.php'; ?>
 
 <div class="container mt-3">
@@ -97,13 +101,15 @@ $result_carreras = $db->query($query_carreras);
         <h5 class="card-header bg-dark text-white">Editar Asignación</h5>
         <div class="card-body bg-light">
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?id=" . $id; ?>">
+                <input type="hidden" name="profesor_id" value="<?php echo htmlspecialchars($registro['usuario_id']); ?>">
+
                 <div class="form-group">
                     <label for="nombre">Nombre del Profesor:</label>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($nombre_profesor) . ' ' . htmlspecialchars($apellido_profesor); ?>" readonly>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($nombre_profesor) . ' ' . htmlspecialchars($apellido_profesor); ?>" >
                 </div>
                 <div class="form-group">
                     <label for="dni">DNI del Profesor:</label>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($dni_profesor); ?>" readonly>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($dni_profesor); ?>" >
                 </div>
                 <div class="form-group">
                     <label for="materia_id">Materia:</label>

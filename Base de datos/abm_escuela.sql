@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 20-08-2024 a las 00:06:26
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 20-08-2024 a las 18:17:46
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -63,7 +63,9 @@ CREATE TABLE `asistencia` (
 --
 
 INSERT INTO `asistencia` (`id`, `profesor_id`, `fecha`, `estado`, `etapa`) VALUES
-(2, 2, '2024-08-09', 'Ausente', 'Activo');
+(2, 2, '2024-08-09', 'Ausente', 'Activo'),
+(4, 5, '2024-08-19', 'Presente', 'Activo'),
+(5, 5, '2024-08-19', 'Presente', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -101,17 +103,24 @@ CREATE TABLE `dicta` (
   `Fecha_baja` date DEFAULT NULL,
   `motivo_baja` varchar(255) DEFAULT NULL,
   `FK_carrera` int(11) DEFAULT NULL,
-  `etapa` varchar(15) NOT NULL
+  `etapa` varchar(15) NOT NULL,
+  `Fecha_alta` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `dicta`
 --
 
-INSERT INTO `dicta` (`id`, `usuario_id`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `FK_carrera`, `etapa`) VALUES
-(1, 5, 1, 'titular', 'NO', NULL, NULL, 1, 'Activo'),
-(2, 3, 3, 'titular', 'NO', NULL, NULL, 2, 'Activo'),
-(3, 3, 2, 'titular', 'NO', NULL, NULL, 1, 'Activo');
+INSERT INTO `dicta` (`id`, `usuario_id`, `FKmateria`, `tipo`, `Baja`, `Fecha_baja`, `motivo_baja`, `FK_carrera`, `etapa`, `Fecha_alta`) VALUES
+(1, 5, 1, 'titular', 'SI', NULL, NULL, 1, 'Inactivo', NULL),
+(2, 3, 2, 'titular', 'SI', '2024-08-07', NULL, 1, 'Inactivo', NULL),
+(3, 3, 2, 'titular', 'SI', '2024-08-20', '2', 1, 'Inactivo', NULL),
+(4, 5, 1, 'suplente', 'SI', '2024-08-20', 'h', 1, 'Inactivo', NULL),
+(5, 5, 3, 'interino', 'SI', '2024-08-20', '3', 2, 'Inactivo', NULL),
+(6, 5, 1, 'titular', 'SI', '2024-08-20', 'f', 1, 'Inactivo', NULL),
+(7, 5, 1, 'titular', 'SI', '2024-08-20', 'dddddddddd', 1, 'Inactivo', '2024-08-20'),
+(8, 5, 1, 'titular', 'SI', '2024-08-20', 'd', 1, 'Inactivo', '2024-08-20'),
+(9, 5, 1, 'titular', 'NO', NULL, NULL, 1, 'Activo', '2024-08-20');
 
 -- --------------------------------------------------------
 
@@ -133,7 +142,8 @@ CREATE TABLE `licencias` (
 --
 
 INSERT INTO `licencias` (`id`, `fechadeinicio`, `fechadefin`, `usuario_id`, `idtipos_licencias`, `etapa`) VALUES
-(1, '2024-08-10', '2024-08-24', 2, 7, 'Inactivo');
+(1, '2024-08-21', '2024-08-15', 2, 7, 'Inactivo'),
+(2, '2024-08-21', '2024-08-15', 2, 7, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -165,6 +175,16 @@ CREATE TABLE `registro_clases` (
   `hora_salida` time DEFAULT NULL,
   `etapa` enum('Activo','Inactivo') NOT NULL DEFAULT 'Activo'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `registro_clases`
+--
+
+INSERT INTO `registro_clases` (`id`, `usuario_id`, `carrera_id`, `materia_id`, `fecha`, `hora_entrada`, `hora_salida`, `etapa`) VALUES
+(2, 3, 2, 3, '2024-08-18', '23:24:21', '22:25:22', 'Activo'),
+(3, 3, 2, 3, '2024-08-19', '23:25:54', '22:28:38', 'Activo'),
+(4, 3, 1, 2, '2024-08-19', '22:27:10', NULL, 'Activo'),
+(5, 3, 2, 3, '2024-08-20', '08:01:17', NULL, 'Activo');
 
 -- --------------------------------------------------------
 
@@ -237,10 +257,11 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id_usuario`, `nombre`, `apellido`, `dni`, `celular`, `correo`, `password`, `direccion`, `foto`, `cv`, `fechadeingreso`, `fechadebaja`, `etapa`, `id_rol`) VALUES
 (1, 'Lucas', 'Gomez', '4423189', '2646984561', 'lucas@gmail.com', '123', '9 de julio', NULL, NULL, '2024-08-08', NULL, 'Activo', 1),
-(2, 'Demian Agustín ', 'Perez', '45973121', '2646057672', 'dem@gmail.com', '123', 'laprida', '', '', '2024-08-08', '2024-08-09', 'Activo', 2),
+(2, 'Demian Agustín ', 'Perez', '45973121', '2646057672', 'dem@gmail.com', '123', 'laprida', '', '', '2024-08-08', '2024-08-20', 'Activo', 2),
 (3, 'Marcos', 'Gomez', '45470152', '2646058711', 'marco11s@gmail.com', '123', '9 de julio', '', '', '2024-08-10', NULL, 'Activo', 2),
 (4, 'Gabriel', 'Fernandez', '44232168', '2646754234', 'gabriel@gmail.com', '123', 'juan jofre', NULL, NULL, '2024-08-07', NULL, 'Activo', 3),
-(5, 'carlos', 'gomez', '44234176', '2646956576', 'carlos@gmail.com', '123', 'pppp', '', '', '2024-08-10', NULL, 'Activo', 2);
+(5, 'carlos', 'gomez', '44234176', '2646956576', 'carlos@gmail.com', '123', 'pppp', '', '', '2024-08-10', '2024-08-20', 'Activo', 2),
+(6, 'maxi', '', '', NULL, 'olmos@gmail.com', '123', NULL, NULL, NULL, '0000-00-00', NULL, 'Activo', 1);
 
 -- --------------------------------------------------------
 
@@ -355,7 +376,7 @@ ALTER TABLE `asignaturas`
 -- AUTO_INCREMENT de la tabla `asistencia`
 --
 ALTER TABLE `asistencia`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `carreras`
@@ -367,13 +388,13 @@ ALTER TABLE `carreras`
 -- AUTO_INCREMENT de la tabla `dicta`
 --
 ALTER TABLE `dicta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `licencias`
 --
 ALTER TABLE `licencias`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
@@ -385,7 +406,7 @@ ALTER TABLE `permisos`
 -- AUTO_INCREMENT de la tabla `registro_clases`
 --
 ALTER TABLE `registro_clases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -403,7 +424,7 @@ ALTER TABLE `tipos_licencias`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario_asignaciones`

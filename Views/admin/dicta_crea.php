@@ -1,6 +1,5 @@
 <?php
 include '../../conn/connection.php';
-include 'navbar.php';
 
 // Variables para almacenar los valores del formulario y mensajes de error
 $usuario_id = $materia_id = $tipo = $carrera_id = $error = "";
@@ -19,7 +18,7 @@ $result_carreras = $db->query($query_carreras);
 
 // Función para verificar la existencia de una asignación
 function checkExistingAssignment($db, $materia_id, $carrera_id, $tipo) {
-    $sql = "SELECT COUNT(*) FROM dicta WHERE FKmateria = :materia_id AND FK_carrera = :carrera_id AND tipo = :tipo";
+    $sql = "SELECT COUNT(*) FROM dicta WHERE FKmateria = :materia_id AND FK_carrera = :carrera_id AND tipo = :tipo AND etapa ='Activo'";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':materia_id', $materia_id);
     $stmt->bindParam(':carrera_id', $carrera_id);
@@ -29,9 +28,10 @@ function checkExistingAssignment($db, $materia_id, $carrera_id, $tipo) {
 }
 
 // Función para insertar la asignación
-function insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id) {
-    $sql = "INSERT INTO dicta (usuario_id, FKmateria, Baja, tipo, etapa, FK_carrera) 
-            VALUES (:usuario_id, :materia_id, :baja, :tipo, :etapa, :carrera_id)";
+function insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id, $Fecha_alta) {
+   
+    $sql = "INSERT INTO dicta (usuario_id, FKmateria, Baja, tipo, etapa, FK_carrera,Fecha_alta) 
+            VALUES (:usuario_id, :materia_id, :baja, :tipo, :etapa, :carrera_id, :Fecha_alta)";
     $stmt = $db->prepare($sql);
     $stmt->bindParam(':usuario_id', $usuario_id);
     $stmt->bindParam(':materia_id', $materia_id);
@@ -39,6 +39,8 @@ function insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $
     $stmt->bindParam(':tipo', $tipo);
     $stmt->bindParam(':etapa', $etapa);
     $stmt->bindParam(':carrera_id', $carrera_id);
+    $stmt->bindParam(':Fecha_alta', $Fecha_alta);
+    
     return $stmt->execute();
 }
 
@@ -48,10 +50,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $materia_id = trim($_POST["materia_id"]);
     $tipo = trim($_POST["tipo"]);
     $carrera_id = trim($_POST["carrera_id"]);
+    $Fecha_alta = date('Y-m-d');
 
     if (!empty($usuario_id) && !empty($materia_id) && !empty($tipo) && !empty($carrera_id)) {
         try {
-            if (checkExistingAssignment($db, $materia_id, $carrera_id, $tipo)) {
+            if (checkExistingAssignment($db, $materia_id, $carrera_id, $tipo, $Fecha_alta)) {
                 echo "<script>
                         Swal.fire({
                             icon: 'error',
@@ -60,17 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             confirmButtonText: 'Cerrar'
                         });
                       </script>";
-            } elseif (insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id)) {
-                echo "<script>
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Éxito',
-                            text: 'Asignación agregada con éxito.',
-                            confirmButtonText: 'Cerrar'
-                        }).then(function() {
-                            window.location.href = 'dicta_index.php';
-                        });
-                      </script>";
+            } elseif (insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id, $Fecha_alta)) {
+                
+                      echo '<script>
+                            var msj = "Asignación agregada con éxito";
+                            window.location="dicta_index.php?mensaje=" + encodeURIComponent(msj);
+                            </script>';
             } else {
                 $error = "Error al ingresar la asignación.";
             }
