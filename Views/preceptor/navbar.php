@@ -1,10 +1,11 @@
 <?php session_start();
-if(!isset($_SESSION['nombre'])){
+if (!isset($_SESSION['nombre'])) {
   header("Location:../home.php");
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,12 +61,13 @@ if(!isset($_SESSION['nombre'])){
 </head>
 <style>
   body {
-    background: linear-gradient(135deg,#0085b7, #192a68);
+    background: linear-gradient(135deg, #0085b7, #192a68);
   }
 </style>
+
 <body>
-<!-- ---------------MENSAJE REGISTROS-------------- -->
-<?php
+  <!-- ---------------MENSAJE REGISTROS-------------- -->
+  <?php
   $mensaje = isset($_GET['mensaje']) ? $_GET['mensaje'] : '';
   $error = isset($_GET['error']) ? $_GET['error'] : '';
   ?>
@@ -95,7 +97,7 @@ if(!isset($_SESSION['nombre'])){
           icon: "error",
           title: "Error",
           text: "<?php echo $error; ?>",
-          showConfirmButton: false,          
+          showConfirmButton: false,
           timer: 1700
         }).then(() => {
           // Eliminar parámetro de la URL
@@ -122,45 +124,49 @@ if(!isset($_SESSION['nombre'])){
           <ul class="navbar-nav mr-auto flex-grow-1 bd-highlight">
             <div class="collapse navbar-collapse " id="navbarNav">
               <ul class="navbar-nav mr-auto ">
-            <!-- ------------------------------- -->
-            <li class="nav-item  pr-3">
-              <a class="nav-link " href="profe_index.php">Profesores</a>
-            </li>
-             <!-- --------------------------- -->            
-            <li class="nav-item  pr-3">
-              <a class="nav-link " href="asistencia_index.php">Asistencia</a>
-            </li>
-            <!-- ------------------------------------------------------- -->
-            <li class="nav-item  pr-3">
-              <a class="nav-link" href="dicta_index.php">Asignaciones</a>
-            </li>
-             <!-- ------------------------------------------------------- -->
-             <li class="nav-item  pr-3">
-              <a class="nav-link" href="licencia_index.php">Agrega Licencia</a>
-            </li>
-            <!-- ------------------------------------------------------- -->            
-          </ul>     
-          <!-- ------------------------------------------------------- -->
-          <form class="form-inline d-flex justify-content-end">
-            <div class="collapse navbar-collapse" id="navbarNav">
-              <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <!-- iconos sacados de "fontawesome" -->
-                    <i class="fas fa-user pr-2"></i>
-                    Preceptor:
-                    <?php if (isset($_SESSION['nombre']) ) : ?>                    
-                    <?php echo $_SESSION['nombre'] ; ?>
-                    <?php endif; ?>
-                    </a>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <!-- <li><a class="dropdown-item" href="#"> <i class="fas fa-user-alt pe-2"></i>My Profile</a></li> -->
-                <li><a class="dropdown-item" href="#"> <i class="fas fa-cog pe-2"></i>Configuración</a></li>
-                <li><a class="dropdown-item" href="javascript:cerrar()"> <i class="fa fa-power-off pe-2"></i>Cerrar Sesión</a></li>
+                <!-- ------------------------------- -->
+                <li class="nav-item pr-3">
+                  <a class="nav-link" href="profe_index.php">Profesores</a>
+                </li>
+                <li class="nav-item pr-3">
+                  <a class="nav-link" href="listar_registros.php">Listado de Profesor</a>
+                </li>
+
+                <!-- --------------------------- -->
+                <li class="nav-item  pr-3">
+                  <a class="nav-link " href="asistencia_index.php">Asistencia</a>
+                </li>
+                <!-- ------------------------------------------------------- -->
+                <li class="nav-item  pr-3">
+                  <a class="nav-link" href="dicta_index.php">Asignaciones</a>
+                </li>
+                <!-- ------------------------------------------------------- -->
+                <li class="nav-item  pr-3">
+                  <a class="nav-link" href="licencia_index.php">Agrega Licencia</a>
+                </li>
+                <!-- ------------------------------------------------------- -->
               </ul>
-              </li>
-            </div>
-            </ul>
+              <!-- ------------------------------------------------------- -->
+              <form class="form-inline d-flex justify-content-end">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                  <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- iconos sacados de "fontawesome" -->
+                        <i class="fas fa-user pr-2"></i>
+                        Preceptor:
+                        <?php if (isset($_SESSION['nombre'])) : ?>
+                          <?php echo $_SESSION['nombre']; ?>
+                        <?php endif; ?>
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <!-- <li><a class="dropdown-item" href="#"> <i class="fas fa-user-alt pe-2"></i>My Profile</a></li> -->
+                        <li><a class="dropdown-item" href="#"> <i class="fas fa-cog pe-2"></i>Configuración</a></li>
+                        <li><a class="dropdown-item" href="javascript:cerrar()"> <i class="fa fa-power-off pe-2"></i>Cerrar Sesión</a></li>
+                      </ul>
+                    </li>
+                </div>
+          </ul>
           </form>
           <!-- ------------------------------------------------------- -->
         </div>
