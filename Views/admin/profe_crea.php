@@ -2,8 +2,6 @@
 require 'navbar.php'; 
 require '../../conn/connection.php';
 
-// Verificar si el usuario está logueado y tiene el rol adecuado
-session_start(); // Asegúrate de que la sesión esté iniciada
 if (!isset($_SESSION['id_rol']) || $_SESSION['id_rol'] != 1) {
     echo '<script>
             alert("No tienes permiso para realizar esta acción.");

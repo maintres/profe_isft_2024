@@ -3,7 +3,7 @@ require '../../conn/connection.php';
 //-------------BORRADO------------------ 
 if(isset($_GET['txtID'])){
   $txtID=(isset($_GET['txtID']))?$_GET['txtID']:"";
-  $sentencia=$db->prepare("UPDATE usuarios SET etapa = 'Inactivo' WHERE id = :id" );
+  $sentencia=$db->prepare("UPDATE usuarios SET etapa = 'Inactivo' WHERE id_usuario = :id" );
   $sentencia->bindParam(':id',$txtID);
   $sentencia->execute();
   $mensaje="Registro Eliminado con Exito";
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo = $_POST["correo"];
     $password = $_POST["password"];    
     $etapa = "Activo";
-    $id_permisos = $_POST["permiso"]; // Valor predeterminado para alumno es 1.
+    $id_rol = $_POST["permiso"]; // Valor predeterminado para alumno es 1.
     $error = "";
     try {
         // Verificar si el correo electrónico ya existe
@@ -38,14 +38,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         } else {
             // Inserta datos en la base de datos
-            $sql = "INSERT INTO usuarios (nombre, correo, password, id_permisos, etapa ) 
-                    VALUES (:nombre, :correo, :password, :id_permisos, :etapa)";
+            $sql = "INSERT INTO usuarios (nombre, correo, password, id_rol, etapa ) 
+                    VALUES (:nombre, :correo, :password, :id_rol, :etapa)";
 
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':nombre', $nombre); 
             $stmt->bindParam(':correo', $correo);
             $stmt->bindParam(':password', $password);
-            $stmt->bindParam(':id_permisos', $id_permisos);
+            $stmt->bindParam(':id_rol', $id_rol);
             $stmt->bindParam(':etapa', $etapa);
 
             if ($stmt->execute()) {
@@ -93,26 +93,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     try {
                                         $db = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_password);
                                         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                                        $query = "SELECT * FROM usuarios WHERE id_permisos = 1 AND etapa = 'Activo' OR id_permisos = 3 AND etapa = 'Activo' ";
+                                        $query = "SELECT * FROM usuarios WHERE id_rol = 1 AND etapa = 'Activo' OR id_rol = 3 AND etapa = 'Activo' ";
                                         $stmt = $db->prepare($query);
                                         $stmt->execute();
                                         $usuarioss = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         foreach ($usuarioss as $usuarios) {
-                                            if($usuarios['id_permisos']===1){
+                                            if($usuarios['id_rol']===1){
                                                 $rol='Administrador';
-                                            }elseif($usuarios['id_permisos']===3){
+                                            }elseif($usuarios['id_rol']===3){
                                                 $rol='Preceptor';
                                             }
                                     ?>
                                             <tr>
-                                                    <th scope="row"><?php echo $usuarios['id'] ?></th>
+                                                    <th scope="row"><?php echo $usuarios['id_usuario'] ?></th>
                                                     <td><?php echo $usuarios['nombre'] ?></td>
                                                     <td><?php echo $usuarios['correo'] ?></td>
                                                     <td><?php echo $rol ?></td>
                                                     <td class="text-center">
                                                         <div class="btn-group">
 
-                                                            <a href="javascript:eliminar4(<?php echo $usuarios['id'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
+                                                            <a href="javascript:eliminar4(<?php echo $usuarios['id_usuario'];?>)" class="btn btn-danger btn-sm" type="button" title="Borrar">                                                            
                                                                 <i class="fas fa-trash"></i>
                                                             </a> 
                                                         </div>  

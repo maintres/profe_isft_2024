@@ -3,42 +3,8 @@ include '../../conn/connection.php';
 
 // Variables para almacenar los valores del formulario y mensajes de error
 $usuario_id = $materia_id = $tipo = $carrera_id = $error = "";
-$etapa = "Activo"; // Actualizado a "Activo"
-
-// Procesamiento del formulario cuando se envía
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Recolecta datos del formulario y realiza validaciones
-    $usuario_id = trim($_POST["usuario_id"]);
-    $materia_id = trim($_POST["materia_id"]);
-    $tipo = trim($_POST["tipo"]);
-    $carrera_id = trim($_POST["carrera_id"]);
-
-    // Validar campos obligatorios
-    if (empty($usuario_id) || empty($materia_id) || empty($tipo) || empty($carrera_id)) {
-        $error = "Por favor complete todos los campos obligatorios.";
-    } else {
-        try {
-            // Inserta datos en la tabla dicta
-            $sql = "INSERT INTO dicta (usuario_id, FKmateria, tipo, etapa, FK_carrera) 
-                    VALUES (:usuario_id, :materia_id, :tipo, :etapa, :carrera_id)";
-            
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':usuario_id', $usuario_id);
-            $stmt->bindParam(':materia_id', $materia_id);
-            $stmt->bindParam(':tipo', $tipo);
-            $stmt->bindParam(':etapa', $etapa);
-            $stmt->bindParam(':carrera_id', $carrera_id);
-            if ($stmt->execute()) {
-                header("Location: dicta_index.php?mensaje=" . urlencode("Asignación agregada con éxito."));
-                exit();
-            } else {
-                $error = "Error al ingresar la asignación.";
-            }
-        } catch (PDOException $e) {
-            $error = "Error en la base de datos: " . $e->getMessage();
-        }
-    }
-}
+$etapa = "Activo";
+$baja = "No";
 
 // Obtener listas de usuarios, carreras y materias para select options
 $query_usuarios = "SELECT id_usuario, CONCAT(nombre, ' ', apellido) AS nombreyapellido 
@@ -49,6 +15,70 @@ $result_usuarios = $db->query($query_usuarios);
 
 $query_carreras = "SELECT id, nombre FROM carreras ORDER BY nombre";
 $result_carreras = $db->query($query_carreras);
+
+// Función para verificar la existencia de una asignación
+function checkExistingAssignment($db, $materia_id, $carrera_id, $tipo) {
+    $sql = "SELECT COUNT(*) FROM dicta WHERE FKmateria = :materia_id AND FK_carrera = :carrera_id AND tipo = :tipo AND etapa ='Activo'";
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':materia_id', $materia_id);
+    $stmt->bindParam(':carrera_id', $carrera_id);
+    $stmt->bindParam(':tipo', $tipo);
+    $stmt->execute();
+    return $stmt->fetchColumn() > 0;
+}
+
+// Función para insertar la asignación
+function insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id, $Fecha_alta) {
+   
+    $sql = "INSERT INTO dicta (usuario_id, FKmateria, Baja, tipo, etapa, FK_carrera,Fecha_alta) 
+            VALUES (:usuario_id, :materia_id, :baja, :tipo, :etapa, :carrera_id, :Fecha_alta)";
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':usuario_id', $usuario_id);
+    $stmt->bindParam(':materia_id', $materia_id);
+    $stmt->bindParam(':baja', $baja);
+    $stmt->bindParam(':tipo', $tipo);
+    $stmt->bindParam(':etapa', $etapa);
+    $stmt->bindParam(':carrera_id', $carrera_id);
+    $stmt->bindParam(':Fecha_alta', $Fecha_alta);
+    
+    return $stmt->execute();
+}
+
+// Procesamiento del formulario cuando se envía
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $usuario_id = trim($_POST["usuario_id"]);
+    $materia_id = trim($_POST["materia_id"]);
+    $tipo = trim($_POST["tipo"]);
+    $carrera_id = trim($_POST["carrera_id"]);
+    $Fecha_alta = date('Y-m-d');
+
+    if (!empty($usuario_id) && !empty($materia_id) && !empty($tipo) && !empty($carrera_id)) {
+        try {
+            if (checkExistingAssignment($db, $materia_id, $carrera_id, $tipo, $Fecha_alta)) {
+                echo "<script>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Esta asignación ya existe para la misma carrera y materia.',
+                            confirmButtonText: 'Cerrar'
+                        });
+                      </script>";
+            } elseif (insertAssignment($db, $usuario_id, $materia_id, $baja, $tipo, $etapa, $carrera_id, $Fecha_alta)) {
+                
+                      echo '<script>
+                            var msj = "Asignación agregada con éxito";
+                            window.location="dicta_index.php?mensaje=" + encodeURIComponent(msj);
+                            </script>';
+            } else {
+                $error = "Error al ingresar la asignación.";
+            }
+        } catch (PDOException $e) {
+            $error = "Error en la base de datos: " . $e->getMessage();
+        }
+    } else {
+        $error = "Por favor complete todos los campos obligatorios.";
+    }
+}
 ?>
 
 <?php require 'navbar.php'; ?>
@@ -60,7 +90,7 @@ $result_carreras = $db->query($query_carreras);
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <div class="form-group">
                     <label for="usuario_id">Profesor:</label>
-                    <select name="usuario_id" class="form-control">
+                    <select id="usuario_id" name="usuario_id" class="form-control">
                         <option value="">Seleccione un profesor</option>
                         <?php while ($row = $result_usuarios->fetch(PDO::FETCH_ASSOC)) : ?>
                             <option value="<?php echo $row['id_usuario']; ?>"><?php echo htmlspecialchars($row['nombreyapellido']); ?></option>
@@ -102,12 +132,12 @@ $result_carreras = $db->query($query_carreras);
 
 <?php require 'footer.php'; ?>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.getElementById('carrera_id').addEventListener('change', function() {
     var carreraId = this.value;
     var materiaSelect = document.getElementById('materia_id');
 
-    // Limpia las materias anteriores
     materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
 
     if (carreraId) {
@@ -117,13 +147,13 @@ document.getElementById('carrera_id').addEventListener('change', function() {
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 var materias = JSON.parse(xhr.responseText);
-                materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>'; // Limpiar primero
-                for (var i = 0; i < materias.length; i++) {
+                materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+                materias.forEach(function(materia) {
                     var option = document.createElement('option');
-                    option.value = materias[i].id;
-                    option.textContent = materias[i].nombre;
+                    option.value = materia.id;
+                    option.textContent = materia.nombre;
                     materiaSelect.appendChild(option);
-                }
+                });
             }
         };
         xhr.send('carrera_id=' + carreraId);

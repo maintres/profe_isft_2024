@@ -4,9 +4,9 @@ include("navbar.php");
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$etapa = isset($_GET['etapa']) ? $_GET['etapa'] : 'Todos';
+$etapa = isset($_GET['etapa']) ? $_GET['etapa'] : 'Activo';
 
-$sql = "SELECT d.id, CONCAT(u.nombre, ' ', u.apellido) AS nombre_profesor, u.dni AS dni_profesor, m.nombre AS nombre_materia, c.nombre AS nombre_carrera, d.tipo, d.Baja, d.Fecha_baja, d.motivo_baja, d.etapa
+$sql = "SELECT d.id, CONCAT(u.nombre, ' ', u.apellido) AS nombre_profesor, u.dni AS dni_profesor, m.nombre AS nombre_materia, c.nombre AS nombre_carrera, d.tipo, d.Baja, d.Fecha_baja,d.Fecha_alta, d.motivo_baja, d.etapa
         FROM dicta d
         INNER JOIN usuarios u ON d.usuario_id = u.id_usuario
         INNER JOIN asignaturas m ON d.FKmateria = m.id
@@ -127,8 +127,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
                                     <th>Materia</th>
                                     <th>Carrera</th>
                                     <th>Tipo</th>
-                                    <th>Baja</th>
+                                    <th>Fecha Alta</th>
                                     <th>Fecha Baja</th>
+                                    <th>Baja</th>                                    
                                     <th>Motivo Baja</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -141,9 +142,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['txtID'])) {
                                         <td><?php echo htmlspecialchars($row['dni_profesor']); ?></td>
                                         <td><?php echo htmlspecialchars($row['nombre_materia']); ?></td>
                                         <td><?php echo htmlspecialchars($row['nombre_carrera']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['tipo']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['tipo']); ?></td>                                        
+                                        <td><?php echo htmlspecialchars($row['Fecha_alta']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['Fecha_baja']); ?></td>                                        
                                         <td><?php echo htmlspecialchars($row['Baja']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['Fecha_baja']); ?></td>
                                         <td><?php echo htmlspecialchars($row['motivo_baja']); ?></td>
                                         <td>
                                             <div class="btn-group">

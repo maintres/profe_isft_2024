@@ -1,21 +1,14 @@
 <?php
 require '../../conn/connection.php'; 
 require 'navbar.php';
-
 //-------------DAR DE BAJA------------------
 if (isset($_GET['txtID'])) {
     $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : "";
-
-    // Obtener la fecha actual
     $fechaBaja = date('Y-m-d');
-
-    // Preparar y ejecutar la consulta para actualizar la tabla usuarios
     $sentencia = $db->prepare("UPDATE usuarios SET etapa = 'Inactivo', fechadebaja = :fechadebaja WHERE id_usuario = :id");
     $sentencia->bindParam(':id', $txtID);
     $sentencia->bindParam(':fechadebaja', $fechaBaja);
     $sentencia->execute();
-
-    // Mensaje de éxito y redirección
     echo '<script>
             var msj = "El usuario ha sido dado de baja exitosamente";
             window.location="profe_index.php?mensaje=" + encodeURIComponent(msj);
@@ -23,7 +16,6 @@ if (isset($_GET['txtID'])) {
     exit();
 }
 ?>
-
 <!-- ------------------------------------------- -->
 <section class="content mt-3">
     <div class="row m-auto">
@@ -54,10 +46,7 @@ if (isset($_GET['txtID'])) {
                         <tbody>
                             <?php
                             try {
-                                // Cambiar la consulta para obtener usuarios con id_rol = 2
-                                $query = "SELECT id_usuario, nombre, apellido, dni, direccion, celular, correo, cv, foto, fechadeingreso, fechadebaja, etapa 
-                                          FROM usuarios 
-                                          WHERE id_rol = 2";
+                                $query = "SELECT * FROM usuarios WHERE id_rol = 2  AND etapa = 'Activo'";
                                 $stmt = $db->prepare($query);
                                 $stmt->execute();
                                 $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -85,8 +74,7 @@ if (isset($_GET['txtID'])) {
                                         <a href="profe_edit.php?id_usuario=<?php echo htmlspecialchars($profesor['id_usuario'], ENT_QUOTES, 'UTF-8'); ?>" 
                                         class="btn btn-warning btn-sm" role="button">
                                         <i class="fas fa-edit"></i></a>
-
-                                        <a href="javascript:darDeBaja(<?php echo $profesor['id_usuario']; ?>)" 
+                                        <a href="javascript:eliminar2(<?php echo $profesor['id_usuario']; ?>)" 
                                                  class="btn btn-danger btn-sm" 
                                                  title="Dar de baja" 
                                                  role="button">
@@ -108,14 +96,6 @@ if (isset($_GET['txtID'])) {
         </div>
     </div>
 </section>
-
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="js/ocultarMensaje.js"></script>
-<script>
-    function darDeBaja(id) {
-        if (confirm('¿Estás seguro de que deseas dar de baja a este usuario?')) {
-            window.location.href = 'profe_index.php?txtID=' + id;
-        }
-    }
-</script>
 <?php require 'footer.php'; ?>
