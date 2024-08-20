@@ -37,7 +37,7 @@ $registros = obtenerRegistrosProfesores($conexion);
             <div class="card rounded-2 border-0">
                 <div class="card-header bg-dark text-white pb-0 d-flex justify-content-between align-items-center">
                     <h5 class="d-inline-block">Listado de Registros de Clases de Profesores</h5>
-                    <a href="generar_pdf.php?export=pdf" class="btn btn-primary">Exportar a PDF</a>
+                    <a href="generar_pdf.php?export=pdf" class="btn btn-secondary float-right mb-2 mr-2">Descargar PDF</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
