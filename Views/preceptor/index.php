@@ -13,7 +13,7 @@
             }
         }
         ?>
-            <h1 class="text-center">Centro Escolar Inicio</h1>
+         <h1 class="text-center m-2">Asistencias y Licencias</h1>
         </div>
     </div>
 <?php require 'footer.php'; ?>

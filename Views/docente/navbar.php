@@ -145,7 +145,7 @@ if(!isset($_SESSION['nombre'])){
                     </a>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <!-- <li><a class="dropdown-item" href="#"> <i class="fas fa-user-alt pe-2"></i>My Profile</a></li> -->
-                <li><a class="dropdown-item" href="#"> <i class="fas fa-cog pe-2"></i>Configuración</a></li>
+                <li><a class="dropdown-item" href="config_user.php"> <i class="fas fa-cog pe-2"></i>Configuración</a></li>
                 <li><a class="dropdown-item" href="javascript:cerrar()"> <i class="fa fa-power-off pe-2"></i>Cerrar Sesión</a></li>
               </ul>
               </li>

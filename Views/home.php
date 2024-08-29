@@ -8,13 +8,13 @@ if($_POST){
         "3" => "No tienes permisos"
     ];
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $correo = $_POST['correo'];
+        $dni = $_POST['dni'];
         $contrasena = $_POST['password']; // Cambiado para coincidir con el nuevo nombre del campo
 
-        if (!empty($correo) && !empty($contrasena)) {
-            $sql = "SELECT * FROM usuarios WHERE correo = :correo AND password = :contrasena";
+        if (!empty($dni) && !empty($contrasena)) {
+            $sql = "SELECT * FROM usuarios WHERE dni = :dni AND password = :contrasena";
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+            $stmt->bindParam(':dni', $dni, PDO::PARAM_STR);
             $stmt->bindParam(':contrasena', $contrasena, PDO::PARAM_STR);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {
@@ -75,25 +75,22 @@ if($_POST){
             <img src="../img/LOGO.ico" alt="login-icon" style="height: 10rem" class="w-100 mb-4" />
         </div>
         <div class="text-center fs-1 fw-bold">Bienvenid@</div>
-        <p>ADMINISTRADOR:</p>
-        <p>lucas@gmail.com</p>
-        <p>PRECEPTOR</p>
-        <p>gabriel@gmail.com</p>
-        <p>Profesor</p>
-        <p>marco11s@gmail.com</p>
+        <p>Admin:4423189</p>
+        <p>Prece:44232168</p>
+        <p>Profe:45470152</p>
         <p>123</p>
         <form method="post" class="form" action="">
             <div class="input-group mt-4">
                 <div class="input-group-text bg-info">
                     <img src="../img/username-icon.svg" alt="username-icon" style="height: 1rem" />
                 </div>
-                <input class="form-control bg-light" type="text" placeholder="E-Mail" name="correo" required />
+                <input class="form-control bg-light" type="text" placeholder="DNI" name="dni" required autocomplete="off" inputmode="numeric" pattern="\d*"/>
             </div>
             <div class="input-group mt-2">
                 <div class="input-group-text bg-info">
                     <img src="../img/padlock-svgrepo-com.svg" alt="password-icon" style="height: 1rem" />
                 </div>
-                <input class="form-control bg-light" type="password" placeholder="Contraseña" name="password" id="password" required />
+                <input class="form-control bg-light" type="password" placeholder="Contraseña" name="password" id="password" required autocomplete="off" />
                 <!-- <button type="button" class="btn btn-outline-primary" name="toggle-eye" id="toggle-eye" onclick="togglePasswordVisibility()">
                     <i class="fas fa-eye p-1"></i>
                 </button> -->
@@ -108,5 +105,4 @@ if($_POST){
         </form>
     </div>
 </body>
-<script src="../js/contraseña.js"></script>
 </html>
